@@ -1,0 +1,61 @@
+[07:02:08] uvicorn down — restarting
+[2026-09-14 09:55:15] Supervisor LGMDM iniciado (puerto 127.0.0.1:8000)
+[2026-09-14 09:57:15] Señal recibida (SIGTERM/SIGINT) — cerrando supervisor
+[2026-09-14 09:57:15] Fin del supervisor (duración total: desde inicio)
+[2026-09-14 14:16:47] Supervisor LGMDM iniciado (puerto 127.0.0.1:8000)
+[2026-09-14 14:16:47] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 14:16:51] Ciclo: uvicorn lanzado (PID 257753) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 14:16:52] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 14:19:12] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 14:19:16] Ciclo: uvicorn lanzado (PID 258542) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 14:19:17] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 14:31:34] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 14:31:38] Ciclo: uvicorn lanzado (PID 259790) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 14:31:39] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 14:41:04] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 14:41:08] Ciclo: uvicorn lanzado (PID 260627) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 14:41:09] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 15:19:29] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 15:19:33] Ciclo: uvicorn lanzado (PID 265584) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 15:19:33] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:07:40] Supervisor LGMDM iniciado (puerto 127.0.0.1:8000)
+[2026-09-14 17:07:40] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:07:44] Ciclo: uvicorn lanzado (PID 287342) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:12:04] Supervisor LGMDM iniciado (puerto 127.0.0.1:8000)
+[2026-09-14 17:12:04] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:12:08] Ciclo: uvicorn lanzado (PID 287515) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:12:09] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:13:13] Señal recibida (SIGTERM/SIGINT) — cerrando supervisor
+[2026-09-14 17:13:13] Fin del supervisor (duración total: desde inicio)
+[2026-09-14 17:13:36] Supervisor LGMDM iniciado (puerto 127.0.0.1:8000)
+[2026-09-14 17:13:36] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:13:40] Ciclo: uvicorn lanzado (PID 287696) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:13:41] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:34:59] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:35:03] Ciclo: uvicorn lanzado (PID 293526) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:35:04] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:36:48] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:36:52] Ciclo: uvicorn lanzado (PID 293697) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:36:53] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:37:13] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:37:13] Ciclo: uvicorn propio seguía vivo — se le envió SIGTERM para reciclar
+[2026-09-14 17:37:17] Ciclo: uvicorn lanzado (PID 293787) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:37:18] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:38:18] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:38:22] Ciclo: uvicorn lanzado (PID 293920) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:38:22] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:39:00] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:39:04] Ciclo: uvicorn lanzado (PID 294030) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:39:05] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:53:45] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:53:49] Ciclo: uvicorn lanzado (PID 295313) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:53:50] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:54:18] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:54:22] Ciclo: uvicorn lanzado (PID 295409) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:54:22] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:55:02] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:55:07] Ciclo: uvicorn lanzado (PID 295524) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:55:07] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
+[2026-09-14 17:55:55] Backend down o no responde — inicio de ciclo: arrancando uvicorn en 127.0.0.1:8000
+[2026-09-14 17:55:59] Ciclo: uvicorn lanzado (PID 295644) — fin de ciclo (reinicios acumulados: 1)
+[2026-09-14 17:56:00] Backend recuperado tras 1 reinicio(s) — reset de contador de fallos
