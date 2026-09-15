@@ -1,0 +1,99 @@
+/**
+ * compat-wall.css — Wall para navegadores incompatibles
+ * Se aplica al <div class="compat-wall"> insertado por 00-compat.js
+ */
+
+.compat-wall {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483647;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1d3a 100%);
+  color: #f7f8ff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  overflow: auto;
+  padding: 2rem;
+  animation: compat-wall-fade-in 0.4s ease-out;
+}
+
+@keyframes compat-wall-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.compat-wall__content {
+  max-width: 480px;
+  width: 100%;
+  padding: 2.5rem;
+  background: rgba(15, 18, 35, 0.85);
+  border-radius: 12px;
+  border: 1px solid rgba(35, 231, 255, 0.3);
+  box-shadow: 0 0 40px rgba(35, 231, 255, 0.15),
+              0 10px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.compat-wall__content h1 {
+  font-size: 1.75rem;
+  margin: 0 0 1rem;
+  color: #ff6b6b;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.compat-wall__content p {
+  margin: 0.75rem 0;
+  line-height: 1.5;
+}
+
+.compat-wall__content ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.compat-wall__content li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  margin: 0.4rem 0;
+  background: rgba(35, 231, 255, 0.08);
+  border-left: 3px solid #23e7ff;
+  border-radius: 4px;
+}
+
+.compat-wall__content li span {
+  font-weight: 500;
+}
+
+.compat-wall__content a {
+  color: #23e7ff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #23e7ff;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.compat-wall__content a:hover {
+  background: #23e7ff;
+  color: #0a0e27;
+}
+
+.compat-wall__small {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  opacity: 0.65;
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compat-wall {
+    animation: none;
+  }
+}

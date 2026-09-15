@@ -1,0 +1,576 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - Mobile First Approach
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --mobile-padding: 8px;
+  --mobile-gap: 6px;
+  --mobile-font-size: 13px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   TABLET: 600px - 959px
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 959px) {
+  :root {
+    --spacing-lg: 12px;
+    --spacing-md: 8px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+
+  /* Layout principal owned by layout-shell.css. */
+
+  .sidebar-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+
+  /* Grid */
+  .control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .process-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .visualization-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    padding: 10px 8px;
+  }
+
+  /* Inputs */
+  input[type="range"] {
+    height: 8px;
+  }
+
+  /* Visualizadores */
+  .visualization-panel {
+    height: 250px;
+    min-height: 200px;
+  }
+
+  canvas {
+    height: 250px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MOBILE: < 600px
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 599px) {
+  :root {
+    --spacing-lg: 8px;
+    --spacing-md: 4px;
+  }
+
+  html, body {
+    font-size: 13px;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .app-header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: 1;
+  }
+
+  .header-center {
+    display: none;
+  }
+
+  .header-right {
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .header-btn {
+    padding: 4px 8px;
+    font-size: 16px;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    font-size: 12px;
+  }
+
+  /* Shell geometry is owned by layout-shell.css. */
+
+  .sidebar-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+
+  .sidebar-tab {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary, rgba(255,255,255,0.6));
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sidebar-tab.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .sidebar-pane {
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-pane.active {
+    display: block;
+  }
+
+  /* PANELS */
+  .panel-block {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .panel-block label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .content-section {
+    padding: 8px;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .content-section h2 {
+    font-size: 14px;
+    margin: 0 0 8px 0;
+  }
+
+  .content-section h3 {
+    font-size: 13px;
+    margin: 0 0 6px 0;
+  }
+
+  /* GRIDS */
+  .control-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .process-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .visualization-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .preset-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  /* CARDS */
+  .process-card {
+    padding: 8px;
+  }
+
+  .process-card-header {
+    padding: 4px 0;
+    margin-bottom: 6px;
+  }
+
+  .process-card-body {
+    padding: 0;
+  }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 8px 6px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .btn-small {
+    padding: 4px;
+    font-size: 11px;
+  }
+
+  .btn-icon {
+    width: auto;
+    padding: 4px 8px;
+  }
+
+  .button-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .button-row .btn {
+    flex: 1;
+  }
+
+  /* INPUTS & SLIDERS */
+  input[type="range"] {
+    height: 6px;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px; /* Prevenir auto-zoom en iOS */
+    padding: 8px 6px;
+    width: 100%;
+  }
+
+  /* DROPDOWN ZONE */
+  .drop-zone {
+    padding: 12px 8px;
+    border-radius: 6px;
+  }
+
+  .drop-zone .icon {
+    font-size: 32px;
+  }
+
+  .drop-zone p {
+    font-size: 12px;
+    margin: 4px 0;
+  }
+
+  /* VISUALIZADORES */
+  .visualization-panel {
+    padding: 6px;
+    border-radius: 4px;
+    height: 180px;
+    min-height: 150px;
+  }
+
+  .visualization-panel h3 {
+    font-size: 12px;
+    margin: 0 0 4px 0;
+  }
+
+  canvas {
+    height: 150px;
+    width: 100%;
+  }
+
+  /* INFO BOXES */
+  .info-box {
+    padding: 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .info-box div {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+  }
+
+  /* METERS */
+  .meters-container {
+    gap: 6px;
+  }
+
+  .meter-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 12px;
+  }
+
+  /* MIXER - CRITICAL */
+  .mixer-container {
+    padding: 8px;
+  }
+
+  .mixer-header {
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .mixer-stems {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mixer-stem {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .mixer-fader {
+    min-height: 100px;
+  }
+
+  .mixer-fader-section {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mixer-eq-section {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* TABLES */
+  table {
+    font-size: 11px;
+    width: 100%;
+  }
+
+  th, td {
+    padding: 4px 2px;
+  }
+
+  /* REFERENCE */
+  .reference-container {
+    padding: 8px;
+  }
+
+  .reference-comparison {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  /* PROJECTS LIST */
+  .projects-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .project-item {
+    padding: 6px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  /* AUDIO PLAYER */
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  .player-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  /* PRESETS */
+  .preset-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .preset-btn {
+    padding: 6px 4px;
+    font-size: 10px;
+    border-radius: 3px;
+  }
+
+  /* PARAM LIST */
+  .param-list {
+    gap: 4px;
+  }
+
+  .param {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 3px;
+  }
+
+  .param label {
+    font-size: 11px;
+  }
+
+  .param .val {
+    font-size: 12px;
+    text-align: right;
+  }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size: 12px;
+    padding: 4px 0;
+  }
+
+  /* MODALS */
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 95vw;
+    padding: 12px;
+  }
+
+  /* FOCUS para touch */
+  *:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  /* FOOTER */
+  .app-footer {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   LANDSCAPE MOBILE: height < 500px
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-header {
+    padding: 4px 8px;
+  }
+
+  .sidebar {
+    max-height: 120px;
+  }
+
+  .visualization-panel {
+    height: 120px;
+  }
+
+  canvas {
+    height: 100px;
+  }
+
+  .content-section {
+    padding: 4px;
+  }
+
+  .process-card {
+    padding: 4px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   LARGE DESKTOP: >= 1400px
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1400px) {
+  .process-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .visualization-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .content-section {
+    padding: 16px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   UTILITY CLASSES
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 599px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .show-mobile {
+    display: none !important;
+  }
+
+  .hide-mobile {
+    display: block !important;
+  }
+}
+
+/* Smooth scrolling */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+

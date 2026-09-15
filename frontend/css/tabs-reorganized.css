@@ -1,0 +1,517 @@
+/* ============================================================
+   Reorganización de pestañas - CSS
+   ============================================================ */
+
+/* Sidebar tabs styling */
+.sidebar-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color, #333);
+  overflow-x: auto;
+  background: var(--bg-secondary, #0f0f14);
+}
+
+.sidebar-tab {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #333);
+  background: var(--bg-tertiary, #1a1a1f);
+  color: var(--text-secondary, #999);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sidebar-tab:hover {
+  background: var(--bg-hover, #252530);
+  border-color: var(--accent, #00ff88);
+  color: var(--text-primary, #fff);
+}
+
+.sidebar-tab.active {
+  background: var(--accent, #00ff88);
+  color: var(--bg-primary, #000);
+  border-color: var(--accent, #00ff88);
+}
+
+/* Sidebar panes */
+.sidebar-pane {
+  display: none;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  flex: 1;
+}
+
+.sidebar-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Panel blocks */
+.panel-block {
+  background: var(--bg-secondary, #0f0f14);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-block label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #999);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Control groups */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.control-group .btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 12px;
+}
+
+/* Viz row */
+.viz-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.viz-row .btn {
+  width: 100%;
+}
+
+/* Viz sections */
+.viz-section {
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.viz-section.active {
+  display: block;
+}
+
+/* Info box */
+.info-box {
+  background: var(--bg-tertiary, #1a1a1f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 12px;
+  font-family: var(--mono, monospace);
+  color: var(--accent, #00ff88);
+}
+
+.info-box > div {
+  padding: 4px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Analysis results */
+.analysis-results,
+.recommendations {
+  background: var(--bg-tertiary, #1a1a1f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.analysis-results > div,
+.recommendations > div {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+
+.analysis-results > div:last-child,
+.recommendations > div:last-child {
+  border-bottom: none;
+}
+
+/* Preset grid */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.preset-btn {
+  padding: 10px;
+  background: var(--bg-tertiary, #1a1a1f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  color: var(--text-primary, #fff);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: var(--bg-hover, #252530);
+  border-color: var(--accent, #00ff88);
+}
+
+.preset-btn.active {
+  background: var(--accent, #00ff88);
+  color: var(--bg-primary, #000);
+}
+
+/* Save preset form */
+.save-preset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.save-preset-form input {
+  padding: 8px;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-tertiary, #1a1a1f);
+  color: var(--text-primary, #fff);
+  font-size: 12px;
+}
+
+.save-preset-form input::placeholder {
+  color: var(--text-secondary, #999);
+}
+
+/* Custom presets list */
+.custom-presets {
+  background: var(--bg-tertiary, #1a1a1f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.custom-preset-item {
+  padding: 8px;
+  margin-bottom: 6px;
+  background: var(--bg-secondary, #0f0f14);
+  border-radius: 3px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.custom-preset-item .btns {
+  display: flex;
+  gap: 4px;
+}
+
+.custom-preset-item button {
+  padding: 4px 8px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+/* Config options */
+.config-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: normal;
+  text-transform: none;
+}
+
+.config-options input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* Meters */
+.meters-container {
+  background: var(--bg-tertiary, #1a1a1f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  padding: 10px;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+}
+
+.meter-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color, #333);
+  color: var(--accent, #00ff88);
+}
+
+.meter-row:last-child {
+  border-bottom: none;
+}
+
+/* AB Controls */
+.ab-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ab-controls .btn {
+  width: 100%;
+  padding: 8px;
+  font-size: 11px;
+}
+
+#abAudioWrap {
+  margin-top: 8px;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+#abAudioWrap audio {
+  width: 100%;
+  height: 30px;
+}
+
+/* Session notes */
+#sessionNotes {
+  background: var(--bg-tertiary, #1a1a1f) !important;
+  color: var(--text-primary, #fff) !important;
+  border-color: var(--border-color, #333) !important;
+}
+
+#sessionNotes::placeholder {
+  color: var(--text-secondary, #999) !important;
+}
+
+/* Audio player */
+.audio-player {
+  background: var(--bg-tertiary, #1a1a1f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: var(--accent, #00ff88);
+  color: var(--bg-primary, #000);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  transform: scale(1.05);
+}
+
+.player-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border-color, #333);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* Download section */
+.download-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid var(--accent, #00ff88);
+}
+
+.download-section .btn-primary {
+  width: 100%;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar-tabs {
+    padding: 8px;
+    gap: 2px;
+  }
+
+  .sidebar-tab {
+    min-width: 80px;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .sidebar-pane {
+    max-height: calc(100vh - 250px);
+  }
+
+  .preset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ab-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .viz-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-tabs {
+    flex-wrap: wrap;
+  }
+
+  .sidebar-tab {
+    flex: 1 1 45%;
+    min-width: auto;
+  }
+
+  .panel-block {
+    padding: 10px;
+    gap: 6px;
+  }
+}
+
+/* ============================================================
+   Layout base del shell nuevo (app-container / app-header /
+   main-container / content-area / app-footer / sidebar)
+   Estas clases no tenian NINGUNA regla fuera de los media
+   queries (solo estaban estilizadas en responsive.css a partir
+   de 959px hacia abajo). En desktop quedaban sin flex/alto
+   definido, lo que rompia todo el layout de una sola pantalla
+   que el resto del CSS (lgmdm.css) da por sentado.
+   Estas reglas van DESPUES de lgmdm.css/responsive.css en el
+   <link>, y usan selectores mas especificos (clase+tag) para
+   pisar de forma predecible los `main{...}!important` viejos.
+   ============================================================ */
+
+.app-container {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  flex: 0 0 auto;
+  height: var(--lg-shell-header-h, 58px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.main-container {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main-container > .sidebar {
+  flex: 0 0 320px;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* .content-area ES el <main> de la app: pisa el `main{height:calc(...)}
+   !important` de lgmdm.css (pensado para cuando <main> es hijo directo
+   de <body>) con una regla mas especifica, porque aca <main> vive un
+   nivel mas adentro (dentro de .main-container). */
+main.content-area {
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.app-footer {
+  flex: 0 0 auto;
+  padding: 2px 12px;
+  font-size: 11px;
+  text-align: center;
+  opacity: 0.55;
+  line-height: 1.6;
+}
+
+/* V3 FIX06 — restore original sidebar and make it genuinely resizable. */
+.main-container{display:grid!important;grid-template-columns:var(--lg-sidebar-w,320px) 8px minmax(0,1fr)!important;min-height:0!important;overflow:hidden!important}
+.main-container>.sidebar{grid-column:1;grid-row:1;width:auto!important;min-width:0!important;max-width:none!important;flex:none!important;height:100%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important}
+.main-container>#sidebarResizeHandle{grid-column:2;grid-row:1;display:block;width:8px;min-width:8px;height:100%;cursor:col-resize;background:rgba(128,145,175,.14);position:relative;z-index:20;user-select:none;touch-action:none;transition:background .15s ease,box-shadow .15s ease}
+.main-container>#sidebarResizeHandle::after{content:'';position:absolute;inset:0 -4px}
+.main-container>#sidebarResizeHandle:hover,.main-container>#sidebarResizeHandle.dragging,.main-container>#sidebarResizeHandle:focus-visible{background:rgba(35,231,255,.42);box-shadow:0 0 12px rgba(35,231,255,.25);outline:none}
+.main-container>.content-area{grid-column:3;grid-row:1;min-width:0!important;min-height:0!important;width:auto!important;height:100%!important;max-height:none!important}
+@media(max-width:959px){
+ .main-container{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;overflow:auto!important}
+ .main-container>.sidebar{width:100%!important;max-height:200px;height:auto!important}
+ .main-container>#sidebarResizeHandle{display:none!important}
+ .main-container>.content-area{flex:1 1 auto!important;width:100%!important;height:auto!important}
+}
+@media(min-width:960px){
+ .main-container.sidebar-collapsed{grid-template-columns:0 8px minmax(0,1fr)!important}
+ .main-container.sidebar-collapsed>.sidebar{width:0!important; min-width:0!important; padding-left:0!important; padding-right:0!important; border:0!important; overflow:hidden!important}
+ .main-container.sidebar-collapsed .sidebarResizeHandle {
+   position: relative;
+   width: 8px;
+   cursor: e-resize;
+   background: transparent;
+ }
+ .main-container.sidebar-collapsed .sidebarResizeHandle::before {
+   content: "";
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   left: -4px;
+   right: -4px;
+   border-left: 1px solid var(--border, rgba(255,255,255,0.08));
+ }
+ .main-container.sidebar-collapsed .sidebarResizeHandle:hover::before {
+   border-left-color: var(--accent, #23e7ff);
+ }
+}
+}

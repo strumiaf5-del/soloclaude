@@ -1,0 +1,266 @@
+/* LGMDM Layout Shell — single geometry authority
+   FIX18: .main-container > .sidebar | #sidebarResizeHandle | .content-area
+   owns the app shell. Legacy component styles stay in lgmdm.css. */
+
+:root {
+  --lg-shell-header-h: clamp(48px, 4.2vh, 62px);
+  --lg-sidebar-w: clamp(250px, 22vw, 520px);
+  --lg-sidebar-min-w: 250px;
+  --lg-sidebar-max-w: min(620px, 65vw);
+  --lg-handle-w: 8px;
+  --lg-content-pad-x: clamp(8px, 1.2vw, 20px);
+  --lg-content-pad-y: clamp(8px, 1.2vh, 18px);
+}
+
+html, body {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.app-container {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  flex: 0 0 var(--lg-shell-header-h);
+  min-height: var(--lg-shell-header-h);
+}
+
+.main-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(var(--lg-sidebar-min-w), var(--lg-sidebar-w)) var(--lg-handle-w) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
+}
+
+.main-container > .sidebar {
+  grid-column: 1;
+  grid-row: 1;
+  width: auto;
+  min-width: 0;
+  max-width: var(--lg-sidebar-max-w);
+  min-height: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.main-container > #sidebarResizeHandle {
+  grid-column: 2;
+  grid-row: 1;
+  width: var(--lg-handle-w);
+  min-width: var(--lg-handle-w);
+  max-width: var(--lg-handle-w);
+  height: 100%;
+  position: relative;
+  inset: auto;
+  z-index: 400;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.main-container > #sidebarResizeHandle::after {
+  content: '';
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  left: 3px;
+  width: 2px;
+  border-radius: 2px;
+  background: rgba(96, 165, 250, .25);
+  transition: background .16s ease, box-shadow .16s ease;
+}
+
+.main-container > #sidebarResizeHandle:hover::after,
+.main-container > #sidebarResizeHandle.dragging::after,
+.main-container > #sidebarResizeHandle:focus-visible::after {
+  background: rgba(96, 165, 250, .85);
+  box-shadow: 0 0 10px rgba(35, 231, 255, .25);
+}
+
+.main-container > .content-area {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--lg-content-pad-y) var(--lg-content-pad-x);
+}
+
+.main-container > .content-area > .content-shell {
+  width: min(100%, 1480px);
+  max-width: 1480px;
+  min-width: 0;
+  min-height: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+#lgmdmWorkspaceShell,
+.lg-workspace-workspace-shell {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+#lgMasterConsole,
+.lg-console {
+  width: 100%;
+  max-width: 1480px;
+  min-width: 0;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+#sidebarCollapseBtn,
+.sidebar-toggle-btn {
+  position: fixed;
+  left: calc(var(--lg-sidebar-w) - 13px);
+  top: clamp(58px, 8vh, 88px);
+  z-index: 500;
+}
+
+.main-container.sidebar-collapsed {
+  grid-template-columns: 0 var(--lg-handle-w) minmax(0, 1fr);
+}
+
+.main-container.sidebar-collapsed > .sidebar {
+  width: 0;
+  min-width: 0;
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border: 0;
+  overflow: hidden;
+}
+
+.main-container.sidebar-collapsed #sidebarCollapseBtn,
+.main-container.sidebar-collapsed .sidebar-toggle-btn {
+  left: 8px;
+}
+
+body.lgmdm-layout-dragging,
+body.lgmdm-layout-dragging * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* The shell collapses to one column before content becomes unusably narrow. */
+@media (max-width: 959px) {
+  :root {
+    --lg-sidebar-min-w: 0px;
+    --lg-sidebar-w: 100%;
+    --lg-sidebar-max-w: 100%;
+  }
+
+  body { overflow: auto; }
+
+  .main-container {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .main-container > .sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .main-container > #sidebarResizeHandle {
+    display: none;
+  }
+
+  .main-container > .content-area {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 8px;
+    overflow: visible;
+  }
+
+  #sidebarCollapseBtn,
+  .sidebar-toggle-btn {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .main-container > .sidebar {
+    max-height: 42dvh;
+    overflow-y: auto;
+  }
+
+  .main-container > .content-area {
+    min-height: 58dvh;
+  }
+
+  .main-container > .content-area > .content-shell,
+  #lgmdmWorkspaceShell,
+  .lg-workspace-workspace-shell,
+  #lgMasterConsole,
+  .lg-console {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-container > .content-area {
+    padding: 6px;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 960px) {
+  .main-container > .content-area {
+    padding-block: 6px;
+  }
+}
+
+/* Shell-level overflow protection; component CSS owns its own sizing. */
+.main-container *,
+.main-container *::before,
+.main-container *::after {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+img, video, canvas, iframe {
+  max-width: 100%;
+}
