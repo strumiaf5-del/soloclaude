@@ -1,0 +1,63 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   tokens.css — Design tokens canónicos LGMDM
+   Scope: ÚNICA fuente de tokens estructurales (font, radii, shadows,
+   type-scale, z-index) + semánticos LGMDM (panel, surface-soft, danger)
+   + shell layout (lg-*).
+
+   Los tokens de COLOR por tema viven en:
+     • themes.css — utility themes (--ui-bg, --ui-surface, --ui-accent, …)
+
+   Los tokens de cada módulo scoped (--pir-*, --lg-*) se definen localmente.
+
+   Regla: cada --token declarado aquí debe tener al menos un var(--token)
+   en algún archivo. Si no se usa, no se declara.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Tipografía ── */
+  --mono: "IBM Plex Mono", "Courier New", monospace;
+  --sans: "Inter", system-ui, sans-serif;
+
+  /* ── Radii ── */
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+
+  /* ── Sombras ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .4);
+  --shadow:    0 4px 16px rgba(0, 0, 0, .5);
+
+  /* ── Shell layout (migrado de layout-shell.css) ── */
+  --lg-shell-header-h: clamp(48px, 4.2vh, 62px);
+  --lg-sidebar-w:      clamp(250px, 22vw, 520px);
+  --lg-sidebar-min-w:  250px;
+  --lg-sidebar-max-w:  min(620px, 65vw);
+  --lg-handle-w:       8px;
+  --lg-content-pad-x:  clamp(8px, 1.2vw, 20px);
+  --lg-content-pad-y:  clamp(8px, 1.2vh, 18px);
+
+  /* ── Semánticos LGMDM (migrado de lgmdm.css) ── */
+  --panel:        #0d111b;
+  --panel-2:      #1a2235;
+  --surface-soft: rgba(255, 255, 255, .025);
+  --danger:       #ff5f72;
+
+  /* ── Type-scale ── */
+  --text-xs:   0.78rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.25rem;
+  --text-xl:   1.5rem;
+
+  /* ── Z-index scale (semantic) ── */
+  --z-base:        0;
+  --z-handle:      400;   /* resize handles */
+  --z-aurora:      90;    /* aurora spectrum bottom strip */
+  --z-insert-rack: 1000;  /* pro insert rack flotante */
+  --z-toast:       1100;  /* toast notifications */
+  --z-modal:       1200;  /* modals (auth, pro-overlay) */
+  --z-admin:       1300;  /* admin (must beat modal) */
+  --z-switcher:    1400;  /* theme switcher (must beat modal+admin) */
+  --z-compat:      2147483647; /* compat wall */
+}

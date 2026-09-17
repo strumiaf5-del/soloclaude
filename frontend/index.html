@@ -7,6 +7,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="#0a0a12" name="theme-color"/>
+<meta content="7.0.3" name="app-version" data-deploy="2026-09-15"/>
 <meta content="LGMDM Intelligent Mastering Console — professional audio mastering workspace" name="description"/>
 <title>LGMDM · Intelligent Mastering Console</title>
 
@@ -16,40 +17,44 @@
 
 
 <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="css/themes.css?v=2.0" rel="stylesheet"/>
-<link href="css/themes-professional.css?v=2.0" rel="stylesheet"/>
-<link href="css/layout-shell.css?v=2.0" rel="stylesheet"/>
-<link href="css/styles.css?v=2.0" rel="stylesheet"/>
-<link href="css/studio.css?v=2.0" rel="stylesheet"/>
-<link href="css/studio-pro.css?v=2.0" rel="stylesheet"/>
-<link href="css/compat-wall.css?v=FIX28" rel="stylesheet"/>
-<link href="css/tabs-reorganized.css?v=2.0" rel="stylesheet"/>
-<link href="css/lgmdm.css?v=2.0" rel="stylesheet"/>
-<link href="css/responsive.css?v=2.0" rel="stylesheet"/>
-<script src="js/00-compat.js?v=FIX28"></script>
+<link href="css/tokens.css" rel="stylesheet"/>
+<link href="css/reset.css" rel="stylesheet"/>
+<link href="css/themes.css" rel="stylesheet"/>
+<link href="css/themes-professional.css" rel="stylesheet"/>
+<link href="css/layout-shell.css" rel="stylesheet"/>
+<link href="css/studio.css" rel="stylesheet"/>
+<link href="css/studio-pro.css" rel="stylesheet"/>
+<link href="css/lgmdm-studio.css" rel="stylesheet"/>
+<link href="css/styles.css" rel="stylesheet"/>
+<link href="css/lgmdm.css" rel="stylesheet"/>
+<link href="css/chain-family-tabs.css" rel="stylesheet"/>
+<link href="css/pro-widgets-v2.css" rel="stylesheet"/>
+<link href="css/pro-insert-rack.css" rel="stylesheet"/>
+<link href="css/responsive.css" rel="stylesheet"/>
+<link href="css/compat-wall.css" rel="stylesheet"/>
+<link href="css/themes-professional-skin.css" rel="stylesheet"/>
 </head>
 <body>
-<div aria-live="polite" id="a11y-announcements" role="status" style="display: none;"></div>
 <div id="auth-overlay"></div>
-<div class="app-container" id="app-container" style="">
+<div id="app-container" class="app-container">
 <!-- HEADER -->
-<header class="app-header"><div class="header-left"><div class="brand-lockup"><div aria-hidden="true" class="logo-mark">LG</div><div class="brand-copy"><h1 class="logo">LGMDM</h1><span class="brand-subtitle">INTELLIGENT MASTERING CONSOLE</span></div></div></div><div class="header-center"><div class="system-chip"><span aria-hidden="true" class="system-dot"></span><span>ENGINE READY</span></div></div><div class="header-right"><button id="btnOpenPremiumSuite" class="header-btn" type="button" title="Suite Premium (12 funciones avanzadas de masterización)" style="width: auto; padding: 0 10px; font-weight: 800; font-size: 11px; color: var(--accent, #52f2bd); display: flex; align-items: center; gap: 4px; cursor: pointer;"><span>💎</span><span>SUITE PRO</span></button><button aria-label="Cambiar tema visual" class="header-btn" id="theme-switcher-btn" title="Cambiar tema visual" type="button">🎨</button></div></header>
+<header class="app-header"><div class="header-left"><div class="brand-lockup"><div aria-hidden="true" class="logo-mark">LG</div><div class="brand-copy"><h1 class="logo">LGMDM</h1><span class="brand-subtitle">INTELLIGENT MASTERING CONSOLE</span></div></div></div><div class="header-center"><div class="system-chip"><span aria-hidden="true" class="system-dot"></span><span>ENGINE READY</span></div></div><div class="header-right"><button id="btnOpenPremiumSuite" class="header-btn header-btn--wide" type="button" title="Suite Premium (12 funciones avanzadas de masterización)"><span>💎</span><span>SUITE PRO</span></button><button aria-label="Cambiar tema visual" class="header-btn" id="theme-switcher-btn" title="Cambiar tema visual" type="button">🎨</button></div></header>
 <!-- MAIN CONTAINER -->
 <div class="main-container lg-app-grid">
 <!-- SIDEBAR CON PESTAÑAS -->
 <!-- SIDEBAR ORIGINAL LGMDM: Archivo / Cadena / Salida / Proyectos -->
-<aside class="sidebar lg-sidebar" data-region="workflow">
+<aside class="sidebar lg-sidebar">
 <div aria-label="Flujo de trabajo" class="sidebar-tabs" id="sidebarTabs">
-<button class="sidebar-tab active" data-pane="pane-archivo" type="button">📁 Archivo</button>
-<button class="sidebar-tab" data-pane="pane-cadena" type="button">⛓ Cadena</button>
-<button class="sidebar-tab" data-pane="pane-salida" type="button">🎚 Salida</button>
-<button class="sidebar-tab" data-pane="pane-proyectos" type="button">📦 Proyectos</button>
-<button id="sidebarCollapseBtn" class="sidebar-tab sidebar-tab-collapse" type="button" title="Colapsar sidebar" aria-label="Colapsar panel lateral" style="margin-left: auto; width: 28px; padding: 0; display: flex; align-items: center; justify-content: center;">◀</button>
+<button class="sidebar-tab active" data-pane="pane-mastering-ref" id="tabMasteringRef" type="button">🎯 Mastering-Ref</button>
+<button class="sidebar-tab" data-pane="pane-cadena" id="tabCadena" type="button">⛓ Cadena</button>
+<button class="sidebar-tab" data-pane="pane-salida" id="tabSalida" type="button">🎚 Salida</button>
+<button class="sidebar-tab" data-pane="pane-mixer" id="tabMixer" type="button">🎛 Mixer</button>
+<button class="sidebar-tab-collapse" id="sidebarCollapseBtn" type="button" title="Colapsar sidebar" aria-label="Colapsar panel lateral">◀</button>
 </div>
 <div class="control-grid sidebar-showing-archivo" id="sidebarPaneContainer">
 <div class="control-stack">
-<!-- ══════ PASO 1 — Archivo ══════ -->
-<details class="process-card process-card-collapsible sidebar-pane-archivo" id="pasoArchivo" open="">
+<!-- ══════ PASO 1 — Mastering y Referencia ══════ -->
+<details class="process-card process-card-collapsible sidebar-pane-archivo sidebar-pane-mastering-ref" id="pasoArchivo" open="">
 <summary class="process-card-header">
 <span class="process-card-step">Paso 1</span>
 <span class="process-card-copy">Carga y contexto</span>
@@ -61,8 +66,8 @@
 <input accept=".wav,.mp3,.flac,.ogg,.aiff,.aif" aria-label="Archivo de audio principal" id="fileInput" type="file"/>
 <div class="icon">🎵</div>
 <p>
-                      Arrastrá tu audio aquí
-                      <br/>
+ Arrastrá tu audio aquí
+ <br/>
 <small>WAV · MP3 · FLAC · OGG · AIFF — máx <span data-lgmdm-max-file-mb=""></span> MB</small>
 </p>
 <div class="uppy-picker" id="uppyPicker"></div>
@@ -85,7 +90,7 @@
 <div class="param param--lg">
 <label for="s-normalize-lufs">LUFS objetivo</label>
 <span class="val" id="v-normalize-lufs">-14.0</span>
-<input data-display-target="v-normalize-lufs" id="s-normalize-lufs" max="-6" min="-23" step="0.5" type="range" value="-14"/>
+<input id="s-normalize-lufs" max="-6" min="-23" step="0.5" type="range" value="-14"/>
 <p class="small-text">Solo ganancia — sin EQ, sin dinámica, sin referencia. -14 = streaming (Spotify/YouTube) · -23 = broadcast (EBU R128) · -6 = muy hot.</p>
 </div>
 <button class="btn btn-secondary full-width" id="btnNormalizeLufs" type="button">Normalizar</button>
@@ -93,8 +98,8 @@
 </div>
 <label class="checkbox-row small-text mt-sm">
 <input checked="" id="saveToLibraryChk" type="checkbox"/>
-                    Guardar en mi librería del servidor
-                  </label>
+ Guardar en mi librería del servidor
+ </label>
 </div>
 <!-- Librería persistente: archivos ya guardados en el server -->
 <div>
@@ -134,9 +139,9 @@
 <input accept=".json,application/json" aria-label="Archivo JSON de preset" class="hidden-input" id="presetJsonInput" type="file"/>
 <div class="status-text" id="presetLoadStatus"></div>
 <div class="param param--lg">
-<label>Objetivo de loudness (plataforma)</label>
+<label for="s-platform">Objetivo de loudness (plataforma)</label>
 </div>
-<select aria-label="Plataforma o destino de loudness" id="s-platform">
+<select aria-label="Plataforma o destino de loudness" class="select-full" id="s-platform">
 <option value="">— Manual —</option>
 <option value="spotify">Spotify (−14 LUFS)</option>
 <option value="youtube">YouTube (−14 LUFS)</option>
@@ -150,50 +155,50 @@
 <details class="mb-none">
 <summary class="summary-accent">
 <span class="summary-pill"></span>
-                    🎯 Match Mastering (referencia)
-                    <span class="summary-divider"></span>
+ 🎯 Match Mastering (referencia)
+ <span class="summary-divider"></span>
 <span class="muted-small">▾</span>
 </summary>
 <div class="space-top-sm">
 <p class="summary-muted">
-                      Subí un track masterizado y el sistema igualará el
-                      <b class="text-on-surface">timbre</b>,
-                      <b class="text-on-surface">loudness</b>,
-                      <b class="text-on-surface">dinámica</b>,
-                      <b class="text-on-surface">estéreo</b>,
-                      <b class="text-on-surface">punch</b>
-                      ,
-                      <b class="text-on-surface">sub-graves</b>
-                      ,
-                      <b class="text-on-surface">sibilancia</b>
-                      y
-                      <b class="text-on-surface">carácter armónico</b>
-                      .
-                    </p>
+ Subí un track masterizado y el sistema igualará el
+ <b class="text-on-surface">timbre</b>,
+ <b class="text-on-surface">loudness</b>,
+ <b class="text-on-surface">dinámica</b>,
+ <b class="text-on-surface">estéreo</b>,
+ <b class="text-on-surface">punch</b>
+ ,
+ <b class="text-on-surface">sub-graves</b>
+ ,
+ <b class="text-on-surface">sibilancia</b>
+ y
+ <b class="text-on-surface">carácter armónico</b>
+ .
+ </p>
 <div class="drop-zone-ref" id="dropZoneRef">
 <input accept=".wav,.mp3,.flac,.ogg,.aiff,.aif" aria-label="Archivo de audio de referencia" class="overlay-input" id="refFileInput" type="file"/>
 <div class="drop-zone-icon">🎯</div>
 <p class="drop-zone-text">
-                        Arrastrá el track de referencia
-                      </p>
+ Arrastrá el track de referencia
+ </p>
 <p class="drop-zone-note">
-                        WAV · MP3 · FLAC · OGG · AIFF — máx <span data-lgmdm-max-file-mb=""></span> MB
-                      </p>
+ WAV · MP3 · FLAC · OGG · AIFF — máx <span data-lgmdm-max-file-mb=""></span> MB
+ </p>
 <div class="file-name" id="refFileName"></div>
 </div>
 <!-- Biblioteca de referencias permanentes -->
 <button class="btn-ref-library" id="btnOpenRefLib" type="button">
-                      📚 <span>Elegir desde biblioteca de referencias</span>
+ 📚 <span>Elegir desde biblioteca de referencias</span>
 <span class="muted-small ml-auto" id="refLibCount"></span>
 </button>
 <div class="ref-actions">
 <label class="checkbox-row">
 <input checked="" id="saveRefToLibraryChk" type="checkbox"/>
-                        Guardar referencia en mi librería
-                      </label>
+ Guardar referencia en mi librería
+ </label>
 <a class="link-inline" href="#" id="toggleRefLibraryList">
-                        usar de mi librería ▾
-                      </a>
+ usar de mi librería ▾
+ </a>
 </div>
 <div class="ref-library-list hidden-panel" id="libraryListRef"></div>
 <div class="control-row">
@@ -236,8 +241,8 @@
 </div>
 <details class="mt-sm">
 <summary class="details-summary">
-                        ⚙ Parámetros avanzados
-                      </summary>
+ ⚙ Parámetros avanzados
+ </summary>
 <div class="mt-sm">
 <div class="param">
 <label for="s-ref-boost">Máx. boost EQ</label>
@@ -282,8 +287,8 @@
 </details>
 <details class="mt-sm">
 <summary class="details-summary details-summary--accent">
-                        💎 Funciones premium para match profesional
-                      </summary>
+ 💎 Funciones premium para match profesional
+ </summary>
 <div class="section-divider--highlight">
 <div class="param param--md">
 <label for="s-ref-premium-profile">Perfil de matching</label>
@@ -301,7 +306,7 @@
 <div class="param param--md">
 <label for="s-ref-loudness-sensitivity">Sensibilidad auditiva 3–6 kHz</label>
 <span class="val" id="v-ref-loudness-sensitivity">65%</span>
-<input data-display-format="percent" data-display-target="v-ref-loudness-sensitivity" id="s-ref-loudness-sensitivity" max="100" min="0" step="5" type="range" value="65"/>
+<input id="s-ref-loudness-sensitivity" max="100" min="0" step="5" type="range" value="65"/>
 </div>
 <label class="checkbox-row">
 <input class="field-input accent-amber" id="s-ref-fixed-lufs" type="checkbox"/>
@@ -310,13 +315,13 @@
 <div class="param param--md" id="fixed-lufs-row">
 <label for="s-ref-fixed-lufs-value">LUFS objetivo</label>
 <span class="val" id="v-ref-fixed-lufs">-14.0</span>
-<input data-display-target="v-ref-fixed-lufs" id="s-ref-fixed-lufs-value" max="-6" min="-24" step="0.5" type="range" value="-14"/>
+<input id="s-ref-fixed-lufs-value" max="-6" min="-24" step="0.5" type="range" value="-14"/>
 <p class="note-mini">Si la referencia viene muy hot (-8/-7/-9 LUFS) y no la querés heredar, activá esto — el resto del matching (EQ, dinámica, estéreo) sigue igual, solo el volumen final queda fijo acá.</p>
 </div>
 <div class="param param--md">
 <label for="s-ref-max-lufs">Techo de loudness (máximo) <span class="lg-inline-note">nunca lo supera, sea cual sea la referencia</span></label>
 <span class="val" id="v-ref-max-lufs">-12.0</span>
-<input data-display-target="v-ref-max-lufs" id="s-ref-max-lufs" max="-6" min="-18" step="0.5" type="range" value="-12"/>
+<input id="s-ref-max-lufs" max="-6" min="-18" step="0.5" type="range" value="-12"/>
 <p class="note-mini">El match siempre intenta llegar al LUFS de la referencia, pero nunca lo cruza — así controlás cuánto "hot" querés sin importar qué tan comprimida venga la referencia. -18 = conservador/dinámico · -6 = muy hot.</p>
 </div>
 <label class="checkbox-row">
@@ -332,8 +337,8 @@
 <span>🧪 Preparar metadata para versiones alternativas (clean, instrumental, TV)</span>
 </label>
 <p class="note-mini">
-                          Estas opciones viajan al backend y quedan registradas en el reporte del job para habilitar flujos premium auditables.
-                        </p>
+ Estas opciones viajan al backend y quedan registradas en el reporte del job para habilitar flujos premium auditables.
+ </p>
 </div>
 </details>
 <details class="param param--lg">
@@ -341,7 +346,7 @@
 <div class="mt-sm">
 <div class="param">
 <label for="s-ref-eq-passes">Pasadas EQ iterativo <span id="v-ref-eq-passes">3</span></label>
-<input data-display-target="v-ref-eq-passes" id="s-ref-eq-passes" max="4" min="1" step="1" type="range" value="3"/>
+<input id="s-ref-eq-passes" max="4" min="1" step="1" type="range" value="3"/>
 <p class="note-mini">1 = pasada única (anterior), 3 = recomendado, 4 = máximo</p>
 </div>
 <label class="checkbox-row">
@@ -350,7 +355,7 @@
 </label>
 <div class="param" id="crest-amount-row">
 <label for="s-ref-crest-amount">Intensidad crest matching <span id="v-ref-crest-amount">75</span>%</label>
-<input data-display-target="v-ref-crest-amount" id="s-ref-crest-amount" max="100" min="0" step="5" type="range" value="75"/>
+<input id="s-ref-crest-amount" max="100" min="0" step="5" type="range" value="75"/>
 </div>
 <label class="checkbox-row">
 <input checked="" class="field-input accent2" id="s-ref-spectral-dynamics" type="checkbox"/>
@@ -358,11 +363,11 @@
 </label>
 <div class="param">
 <label for="s-ref-spectral-dyn-amount">Intensidad spectral dynamics <span id="v-ref-spectral-dyn-amount">60</span>%</label>
-<input data-display-target="v-ref-spectral-dyn-amount" id="s-ref-spectral-dyn-amount" max="100" min="0" step="5" type="range" value="60"/>
+<input id="s-ref-spectral-dyn-amount" max="100" min="0" step="5" type="range" value="60"/>
 </div>
 <div class="param">
 <label for="s-ref-spectral-dyn-bins">Rangos dinámicos <span id="v-ref-spectral-dyn-bins">4</span></label>
-<input data-display-target="v-ref-spectral-dyn-bins" id="s-ref-spectral-dyn-bins" max="4" min="2" step="1" type="range" value="4"/>
+<input id="s-ref-spectral-dyn-bins" max="4" min="2" step="1" type="range" value="4"/>
 <p class="note-mini">2 = suave/fuerte · 4 = cuartiles</p>
 </div>
 </div>
@@ -376,19 +381,19 @@
 </label>
 <div class="param">
 <label for="s-ref-parallel-mix">Mix parallel <span id="v-ref-parallel-mix">28</span>%</label>
-<input data-display-target="v-ref-parallel-mix" id="s-ref-parallel-mix" max="60" min="0" step="2" type="range" value="28"/>
+<input id="s-ref-parallel-mix" max="60" min="0" step="2" type="range" value="28"/>
 </div>
 <div class="param">
 <label for="s-ref-parallel-thr">Threshold <span id="v-ref-parallel-thr">-20</span> dB</label>
-<input data-display-target="v-ref-parallel-thr" id="s-ref-parallel-thr" max="-6" min="-40" step="1" type="range" value="-20"/>
+<input id="s-ref-parallel-thr" max="-6" min="-40" step="1" type="range" value="-20"/>
 </div>
 <div class="param">
 <label for="s-ref-parallel-ratio">Ratio <span id="v-ref-parallel-ratio">4.0</span>:1</label>
-<input data-display-format="fixed1" data-display-target="v-ref-parallel-ratio" id="s-ref-parallel-ratio" max="10" min="1.5" step="0.5" type="range" value="4"/>
+<input id="s-ref-parallel-ratio" max="10" min="1.5" step="0.5" type="range" value="4"/>
 </div>
 <div class="param">
 <label for="s-ref-parallel-makeup">Makeup <span id="v-ref-parallel-makeup">6</span> dB</label>
-<input data-display-target="v-ref-parallel-makeup" id="s-ref-parallel-makeup" max="18" min="0" step="0.5" type="range" value="6"/>
+<input id="s-ref-parallel-makeup" max="18" min="0" step="0.5" type="range" value="6"/>
 </div>
 <label class="checkbox-row">
 <input class="field-input accent2" id="s-ref-mb-sat" type="checkbox"/>
@@ -396,19 +401,19 @@
 </label>
 <div class="param">
 <label for="s-ref-mb-sat-mix">Mix saturación <span id="v-ref-mb-sat-mix">45</span>%</label>
-<input data-display-target="v-ref-mb-sat-mix" id="s-ref-mb-sat-mix" max="100" min="0" step="5" type="range" value="45"/>
+<input id="s-ref-mb-sat-mix" max="100" min="0" step="5" type="range" value="45"/>
 </div>
 <div class="param">
 <label for="s-ref-mb-sat-low">Drive bajos <span id="v-ref-mb-sat-low">7</span></label>
-<input data-display-target="v-ref-mb-sat-low" id="s-ref-mb-sat-low" max="20" min="0" step="1" type="range" value="7"/>
+<input id="s-ref-mb-sat-low" max="20" min="0" step="1" type="range" value="7"/>
 </div>
 <div class="param">
 <label for="s-ref-mb-sat-mid">Drive medios <span id="v-ref-mb-sat-mid">4</span></label>
-<input data-display-target="v-ref-mb-sat-mid" id="s-ref-mb-sat-mid" max="15" min="0" step="1" type="range" value="4"/>
+<input id="s-ref-mb-sat-mid" max="15" min="0" step="1" type="range" value="4"/>
 </div>
 <div class="param">
 <label for="s-ref-mb-sat-high">Drive agudos <span id="v-ref-mb-sat-high">2</span></label>
-<input data-display-target="v-ref-mb-sat-high" id="s-ref-mb-sat-high" max="10" min="0" step="1" type="range" value="2"/>
+<input id="s-ref-mb-sat-high" max="10" min="0" step="1" type="range" value="2"/>
 </div>
 <div class="param">
 <label for="s-ref-mb-sat-mode">Modo saturación</label>
@@ -424,20 +429,20 @@
 </label>
 <div class="param">
 <label for="s-ref-gentle-ceil">Ceiling gentle <span id="v-ref-gentle-ceil">-2.5</span> dBTP</label>
-<input data-display-format="fixed1" data-display-target="v-ref-gentle-ceil" id="s-ref-gentle-ceil" max="-0.5" min="-12" step="0.5" type="range" value="-2.5"/>
+<input id="s-ref-gentle-ceil" max="-0.5" min="-12" step="0.5" type="range" value="-2.5"/>
 </div>
 <div class="param">
 <label for="s-ref-gentle-rel">Release gentle <span id="v-ref-gentle-rel">120</span> ms</label>
-<input data-display-target="v-ref-gentle-rel" id="s-ref-gentle-rel" max="500" min="20" step="10" type="range" value="120"/>
+<input id="s-ref-gentle-rel" max="500" min="20" step="10" type="range" value="120"/>
 </div>
 </div>
 </details>
 <button class="btn btn-ref btn-block" disabled="" id="btnMasterRef" type="button">
-                      🎯 Masterizar con referencia
-                    </button>
+ 🎯 Masterizar con referencia
+ </button>
 <button class="btn btn-secondary btn-block" disabled="" id="btnRefPreview" type="button">
-                      ▶ Preview 10s (seg. 40)
-                    </button>
+ ▶ Preview 10s (seg. 40)
+ </button>
 <!-- Preview en tiempo real con referencia -->
 <div class="hidden-panel mt-lg" id="refPreviewPanel">
 <div class="section-title-row section-title-row--compact">
@@ -474,22 +479,22 @@
 <div>
 <div class="section-label">
 <span class="stage-num">0</span>
-                    🎙️ Reducción de Ruido
-                  </div>
+ 🎙️ Reducción de Ruido
+ </div>
 <label class="toggle-label">
 <input checked="" class="field-input" id="s-nr-bypass" type="checkbox"/>
-                    Bypass reducción de ruido
-                  </label>
+ Bypass reducción de ruido
+ </label>
 <div class="control-row-wide">
 <div>
 <label class="param-label" for="s-nr-strength">Intensidad</label>
-<input aria-label="Intensidad de reducción de ruido" data-display-format="fixed2" data-display-target="v-nr-strength" id="s-nr-strength" max="1" min="0" step="0.05" type="range" value="0.5"/>
+<input aria-label="Intensidad de reducción de ruido" id="s-nr-strength" max="1" min="0" step="0.05" type="range" value="0.5"/>
 <span class="val-badge" id="v-nr-strength">0.50</span>
 <span class="param-hint">0 = ninguna · 1 = máxima</span>
 </div>
 <div>
 <label class="param-label" for="s-nr-noise-sample-sec">Muestra de ruido (seg)</label>
-<input aria-label="Duración de la muestra de ruido, en segundos" data-display-format="fixed1s" data-display-target="v-nr-noise-sample-sec" id="s-nr-noise-sample-sec" max="5" min="0.1" step="0.1" type="range" value="0.5"/>
+<input aria-label="Duración de la muestra de ruido, en segundos" id="s-nr-noise-sample-sec" max="5" min="0.1" step="0.1" type="range" value="0.5"/>
 <span class="val-badge" id="v-nr-noise-sample-sec">0.5s</span>
 <span class="param-hint">Zona inicial para perfil de ruido</span>
 </div>
@@ -499,8 +504,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">1</span>
-                    Input Gain — trim
-                  </div>
+ Input Gain — trim
+ </div>
 <div class="param">
 <label for="s-ingain">Ganancia de entrada</label>
 <span class="val" id="v-ingain">0.0 dB</span>
@@ -520,8 +525,8 @@
 <div class="control-stack">
 <div class="section-label">
 <span class="stage-num">2</span>
-                        Filtros de borde
-                      </div>
+ Filtros de borde
+ </div>
 <div class="param">
 <label for="s-hp">High-pass cutoff</label>
 <span class="val" id="v-hp">30 Hz</span>
@@ -529,8 +534,8 @@
 </div>
 <label class="toggle-label toggle-label--tight">
 <input checked="" class="field-input" id="s-lp-bypass" type="checkbox"/>
-                        Bypass low-pass
-                      </label>
+ Bypass low-pass
+ </label>
 <div class="param">
 <label for="s-lp-cutoff">Low-pass cutoff</label>
 <span class="val" id="v-lp-cutoff">18.0 kHz</span>
@@ -538,8 +543,8 @@
 </div>
 <div class="section-label mt-lg">
 <span class="stage-num">3</span>
-                        EQ correctiva / cirugía
-                      </div>
+ EQ correctiva / cirugía
+ </div>
 <div class="eq4-wrap">
 <div class="eq4-band">
 <div class="eq4-header"><span class="eq4-num">B1</span></div>
@@ -598,11 +603,11 @@
 </div>
 <!-- Dynamic EQ resonancias — etapa 3 -->
 <div class="section-label space-top-sm">
-                        🔎 Dynamic EQ — Resonancias
-                        <label class="toggle-label-right">
+ 🔎 Dynamic EQ — Resonancias
+ <label class="toggle-label-right">
 <input checked="" id="s-reso-bypass" type="checkbox"/>
-                          Bypass
-                        </label>
+ Bypass
+ </label>
 </div>
 <div class="param">
 <label for="s-reso-freq">Frecuencia (Hz)</label>
@@ -641,11 +646,11 @@
 </div>
 <!-- Balance tonal automático (EQ inteligente sin referencia) — etapa 6 -->
 <div class="section-label space-top-sm">
-                        🎯 Balance tonal automático
-                        <label class="toggle-label-right">
+ 🎯 Balance tonal automático
+ <label class="toggle-label-right">
 <input checked="" id="s-tonalbal-bypass" type="checkbox"/>
-                          Bypass
-                        </label>
+ Bypass
+ </label>
 </div>
 <div class="param">
 <label for="s-tonalbal-amount">Cantidad (mix)</label>
@@ -670,8 +675,8 @@
 <!-- EQ tonal sweetening — etapa 6 -->
 <div class="section-label space-top-sm">
 <span class="stage-num">6</span>
-                        EQ tonal / sweetening
-                      </div>
+ EQ tonal / sweetening
+ </div>
 <div class="eq4-wrap">
 <div class="eq4-band">
 <div class="eq4-header"><span class="eq4-num">B4</span></div>
@@ -767,8 +772,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">4</span>
-                    Mid / Side (EQ + Comp)
-                  </div>
+ Mid / Side (EQ + Comp)
+ </div>
 <div class="param">
 <label for="s-mgain">Ganancia Mid</label>
 <span class="val" id="v-mgain">0 dB</span>
@@ -781,13 +786,13 @@
 </div>
 <label class="ms-control-label ms-control-label--compact">
 <input checked="" class="field-input" id="s-mseq-bypass" type="checkbox"/>
-                    Bypass EQ M/S bandeada
-                  </label>
+ Bypass EQ M/S bandeada
+ </label>
 <div class="control-row-wide">
 <div>
 <div class="param-label">
-                        Mid
-                      </div>
+ Mid
+ </div>
 <div class="param">
 <label for="s-mseq-mid-freq">Freq</label>
 <span class="val" id="v-mseq-mid-freq">250 Hz</span>
@@ -806,8 +811,8 @@
 </div>
 <div>
 <div class="param-label">
-                        Side
-                      </div>
+ Side
+ </div>
 <div class="param">
 <label for="s-mseq-side-freq">Freq</label>
 <span class="val" id="v-mseq-side-freq">8.0 kHz</span>
@@ -827,13 +832,13 @@
 </div>
 <label class="ms-control-label ms-control-label--spaced">
 <input checked="" class="field-input" id="s-mscomp-bypass" type="checkbox"/>
-                    Bypass Compresor M/S
-                  </label>
+ Bypass Compresor M/S
+ </label>
 <div class="control-row-wide">
 <div>
 <div class="param-label">
-                        Mid
-                      </div>
+ Mid
+ </div>
 <div class="param">
 <label for="s-mscomp-mid-thresh">Threshold</label>
 <span class="val" id="v-mscomp-mid-thresh">-18.0 dB</span>
@@ -862,8 +867,8 @@
 </div>
 <label class="ms-control-label ms-control-label--grid">
 <input checked="" class="field-input" id="s-mscomp-pdr" type="checkbox"/>
-                      PDR (Program-Dependent Release, Mid + Side)
-                    </label>
+ PDR (Program-Dependent Release, Mid + Side)
+ </label>
 <div class="param grid-full">
 <label for="s-mscomp-pdr-hold">PDR Hold</label>
 <span class="val" id="v-mscomp-pdr-hold">500 ms</span>
@@ -871,8 +876,8 @@
 </div>
 <div>
 <div class="param-label">
-                        Side
-                      </div>
+ Side
+ </div>
 <div class="param">
 <label for="s-mscomp-side-thresh">Threshold</label>
 <span class="val" id="v-mscomp-side-thresh">-18.0 dB</span>
@@ -914,8 +919,8 @@
 <div class="control-stack">
 <div class="section-label">
 <span class="stage-num">5</span>
-                        Dinámica — banda ancha VCA/Opto
-                      </div>
+ Dinámica — banda ancha VCA/Opto
+ </div>
 <div class="param">
 <label for="s-thresh">Threshold (dB)</label>
 <span class="val" id="v-thresh">-18.0 dB</span>
@@ -943,20 +948,20 @@
 </div>
 <label class="toggle-label">
 <input checked="" class="field-input" id="s-comp-link" type="checkbox"/>
-                        Stereo link L/R
-                      </label>
+ Stereo link L/R
+ </label>
 <div class="section-label mt-lg">
 <span class="stage-num">5b</span>
-                        Compresión paralela (New York)
-                        <label class="toggle-label-right">
-<input checked="" data-parallel-bypass"="" id="parallelBypass" type="checkbox"/>
-                          Bypass
-                        </label>
+ Compresión paralela (New York)
+ <label class="toggle-label-right">
+<input checked="" data-parallel-bypass="" id="parallelBypass" type="checkbox"/>
+ Bypass
+ </label>
 </div>
 <label class="toggle-label toggle-label--compact">
 <input checked="" class="field-input" id="s-comp-pdr" type="checkbox"/>
-                        PDR (Program-Dependent Release)
-                      </label>
+ PDR (Program-Dependent Release)
+ </label>
 <div class="param">
 <label for="s-comp-pdr-hold">PDR Hold</label>
 <span class="val" id="v-comp-pdr-hold">500 ms</span>
@@ -994,11 +999,11 @@
 <div>
 <div class="section-label">
 <span class="stage-num">7</span>
-                    🎚 De-esser dedicado
-                    <label class="toggle-label-right">
+ 🎚 De-esser dedicado
+ <label class="toggle-label-right">
 <input checked="" id="s-dyneq-bypass" type="checkbox"/>
-                      Bypass
-                    </label>
+ Bypass
+ </label>
 </div>
 <div class="param">
 <label for="s-dyneq-freq">Frecuencia (Hz)</label>
@@ -1040,11 +1045,11 @@
 <div class="mb-wrap" id="mbWrap">
 <h3>
 <span class="stage-num stage-num--highlight">8</span>
-                    🔊 Compresor Multibanda
-                    <label class="toggle-label-right">
+ 🔊 Compresor Multibanda
+ <label class="toggle-label-right">
 <input checked="" id="mb-bypass" type="checkbox"/>
-                      Bypass
-                    </label>
+ Bypass
+ </label>
 </h3>
 <div class="mb-crossover">
 <div class="param">
@@ -1092,8 +1097,8 @@
 </div>
 <label class="ms-control-label ms-control-label--makeup">
 <input checked="" class="field-input" id="s-mb-pdr" type="checkbox"/>
-                    PDR (Program-Dependent Release, comparte config las 3 bandas)
-                  </label>
+ PDR (Program-Dependent Release, comparte config las 3 bandas)
+ </label>
 <div class="param">
 <label for="s-mb-pdr-hold">PDR Hold</label>
 <span class="val" id="v-mb-pdr-hold">500 ms</span>
@@ -1158,8 +1163,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">9</span>
-                    Transient Shaper
-                  </div>
+ Transient Shaper
+ </div>
 <div class="param">
 <label for="s-tatt">Ataque (punch)</label>
 <span class="val" id="v-tatt">+0.00</span>
@@ -1175,8 +1180,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">10</span>
-                    Saturación armónica
-                  </div>
+ Saturación armónica
+ </div>
 <div class="param">
 <label for="s-satdrive">Drive</label>
 <span class="val" id="v-satdrive">0%</span>
@@ -1197,8 +1202,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">11</span>
-                    Espacio &amp; Estéreo
-                  </div>
+ Espacio &amp; Estéreo
+ </div>
 <div class="param">
 <label for="s-width">Amplitud estéreo</label>
 <span class="val" id="v-width">1.2x</span>
@@ -1206,8 +1211,8 @@
 </div>
 <label class="toggle-label">
 <input class="field-input" id="s-enhancer" type="checkbox"/>
-                    Stereo Enhancer (bass-mono + Haas)
-                  </label>
+ Stereo Enhancer (bass-mono + Haas)
+ </label>
 <div class="param">
 <label for="s-haas">Haas delay</label>
 <span class="val" id="v-haas">0 ms</span>
@@ -1230,11 +1235,11 @@
 </div>
 <!-- Multiband Stereo Width — etapa 11 -->
 <div class="section-label mt-lg">
-                    🎛 Multiband Stereo Width
-                    <label class="toggle-label-right">
+ 🎛 Multiband Stereo Width
+ <label class="toggle-label-right">
 <input checked="" id="mb-stereo-bypass" type="checkbox"/>
-                      Bypass
-                    </label>
+ Bypass
+ </label>
 </div>
 <div class="param">
 <label for="s-mb-sw-lowx">Cruce Low→Mid</label>
@@ -1266,8 +1271,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">12</span>
-                    🔊 Low-End Mono Maker
-                  </div>
+ 🔊 Low-End Mono Maker
+ </div>
 <div class="param">
 <label for="s-mono-freq">Frecuencia corte (Hz)</label>
 <span class="val" id="v-mono-freq">120 Hz</span>
@@ -1283,12 +1288,12 @@
 <div>
 <div class="section-label">
 <span class="stage-num">13</span>
-                    Glue Compressor — bus final
-                  </div>
+ Glue Compressor — bus final
+ </div>
 <label class="toggle-label">
 <input checked="" class="field-input" id="s-glue-bypass" type="checkbox"/>
-                    Bypass glue compressor
-                  </label>
+ Bypass glue compressor
+ </label>
 <div class="param">
 <label for="s-glue-thresh">Threshold (dB)</label>
 <span class="val" id="v-glue-thresh">-4.0 dB</span>
@@ -1317,8 +1322,8 @@
 </div>
 <label class="ms-control-label ms-control-label--bottom">
 <input checked="" class="field-input" id="s-glue-pdr" type="checkbox"/>
-                    PDR (Program-Dependent Release)
-                  </label>
+ PDR (Program-Dependent Release)
+ </label>
 <div class="param">
 <label for="s-glue-pdr-hold">PDR Hold</label>
 <span class="val" id="v-glue-pdr-hold">500 ms</span>
@@ -1328,12 +1333,12 @@
 <div>
 <div class="section-label">
 <span class="stage-num">14</span>
-                    ✂️ Clipper
-                  </div>
+ ✂️ Clipper
+ </div>
 <label class="toggle-label toggle-label--compact">
 <input checked="" class="field-input" id="s-clip-bypass" type="checkbox"/>
-                    Bypass clipper
-                  </label>
+ Bypass clipper
+ </label>
 <select aria-label="Modo de clipping" class="select-full" id="s-clip-mode">
 <option selected="" value="soft">Soft (tanh, musical)</option>
 <option value="hard">Hard (corte duro)</option>
@@ -1349,8 +1354,8 @@
 <input id="s-clip-drive" max="24" min="0" step="0.5" type="range" value="0"/>
 </div>
 <div class="text-muted-body">
-                    Le quita trabajo al limitador antes de que este entre a actuar.
-                  </div>
+ Le quita trabajo al limitador antes de que este entre a actuar.
+ </div>
 </div>
 <!-- ── Etapa 15: Normalización & Limiter ── -->
 <div class="control-card">
@@ -1365,12 +1370,12 @@
 <div class="control-stack">
 <div class="section-label">
 <span class="stage-num">15</span>
-                        Normalización &amp; Limiter
-                      </div>
+ Normalización &amp; Limiter
+ </div>
 <label class="toggle-label">
 <input class="field-input" id="s-uselufs" type="checkbox"/>
-                        Normalizar por LUFS
-                      </label>
+ Normalizar por LUFS
+ </label>
 <div class="param">
 <label for="s-peak">Target Peak (dBTP)</label>
 <span class="val" id="v-peak">-0.4 dBTP</span>
@@ -1383,12 +1388,12 @@
 </div>
 <label class="toggle-label">
 <input class="field-input" id="s-uselufs-adaptive" type="checkbox"/>
-                        👂 LUFS adaptativo al oído humano <span class="note-mini">(más sensible 3–6 kHz, como en reference matching)</span>
+ 👂 LUFS adaptativo al oído humano <span class="note-mini">(más sensible 3–6 kHz, como en reference matching)</span>
 </label>
 <div class="param">
 <label for="s-uselufs-sensitivity">Sensibilidad auditiva 3–6 kHz</label>
 <span class="val" id="v-uselufs-sensitivity">65%</span>
-<input data-display-format="percent" data-display-target="v-uselufs-sensitivity" id="s-uselufs-sensitivity" max="100" min="0" step="5" type="range" value="65"/>
+<input id="s-uselufs-sensitivity" max="100" min="0" step="5" type="range" value="65"/>
 </div>
 <div class="param">
 <label for="s-ceiling">Limiter — techo (dBTP)</label>
@@ -1407,8 +1412,8 @@
 <div>
 <div class="section-label">
 <span class="stage-num">16</span>
-                    Salida &amp; Oversampling
-                  </div>
+ Salida &amp; Oversampling
+ </div>
 <select aria-label="Modo de oversampling" class="select-full" id="s-oversample">
 <option value="off">Oversampling: off</option>
 <option value="draft">Oversampling: draft</option>
@@ -1444,42 +1449,42 @@
 <div>
 <div class="section-label">Preview del servidor</div>
 <label class="ms-control-label ms-control-label--preview">
-<input class="field-input" data-persist="false" id="s-livepreview" type="checkbox"/>
-                    Habilitar Preview
-                  </label>
+<input class="field-input" id="s-livepreview" type="checkbox"/>
+ Habilitar Preview
+ </label>
 <div class="text-muted-body">
-                    El servidor procesa el Preview completo con los parámetros actuales. Solo cuando termina se habilita la reproducción.
-                  </div>
+ El servidor procesa el Preview completo con los parámetros actuales. Solo cuando termina se habilita la reproducción.
+ </div>
 <div class="status-text" id="previewStatus">
-                    Preview deshabilitado
-                  </div>
+ Preview deshabilitado
+ </div>
 </div>
 <div class="process-card process-card-accent">
-<button class="btn btn-automaster hidden-panel" disabled="" id="btnAutoMaster" type="button">
-                    🤖 Auto-Mastering IA
-                  </button>
-<button class="btn btn-secondary hidden-panel" disabled="" id="btnAiSuggest" type="button">
-                    🤖 Sugerir con IA (sin masterizar)
-                  </button>
+<button class="btn btn-automaster" disabled="" id="btnAutoMaster" type="button">
+ 🤖 Auto-Mastering IA
+ </button>
+<button class="btn btn-secondary" disabled="" id="btnAiSuggest" type="button">
+ 🤖 Sugerir con IA (sin masterizar)
+ </button>
 <button class="btn btn-primary" disabled="" id="btnMaster" type="button">▶ Masterizar</button>
 <div class="grid-2cols-tight" id="secondaryBtnGrid">
-<button class="btn btn-secondary hidden-panel" disabled="" id="btnAnalyzeGrid" type="button">
-                      🔍 Analizar
-                    </button>
-<button class="btn btn-secondary hidden-panel" disabled="" id="btnAdviceGrid" type="button">
-                      💡 Consejos
-                    </button>
-<button class="btn btn-secondary hidden-panel" disabled="" id="btnSpectrum" type="button">
-                      📊 Spectrum
-                    </button>
+<button class="btn btn-secondary" disabled="" id="btnAnalyzeGrid" type="button">
+ 🔍 Analizar
+ </button>
+<button class="btn btn-secondary" disabled="" id="btnAdviceGrid" type="button">
+ 💡 Consejos
+ </button>
+<button class="btn btn-secondary" disabled="" id="btnSpectrum" type="button">
+ 📊 Spectrum
+ </button>
 <select class="select-full" id="s-stems-mode" title="Modo de separación de stems">
 <option selected="" value="demucs_4stem">🧬 Demucs — 4 stems (voz/batería/bajo/otros)</option>
 <option value="vocals_hq">🎤 Roformer — solo voz/instrumental (mejor calidad de voz)</option>
 </select>
-<button class="btn btn-secondary hidden-panel" disabled="" id="btnStems" type="button">🧬 Stems</button>
-<button class="btn btn-ab hidden-panel grid-full" disabled="" id="btnAB" type="button">
-                      ⚡ A/B
-                    </button>
+<button class="btn btn-secondary" disabled="" id="btnStems" type="button">🧬 Stems</button>
+<button class="btn btn-ab grid-full" disabled="" id="btnAB" type="button">
+ ⚡ A/B
+ </button>
 </div>
 <input aria-label="Nombre del tema para la descarga" class="hidden-panel" id="trackNameInput" maxlength="120" placeholder="Nombre del tema para la descarga" type="text"/>
 <button class="btn btn-download" id="btnDownload" type="button">⬇ Descargar</button>
@@ -1488,6 +1493,10 @@
 <div class="aside-scroll-hint" id="asideScrollHint"></div>
 </div>
 </details>
+<!-- ══════ PASO 4 — Mixer ══════ -->
+<div class="sidebar-pane-mixer" id="pasoMixer">
+<div id="mixerSidePanel" class="mxr-side-panel"></div>
+</div>
 </div>
 <!-- /control-stack -->
 </div>
@@ -1495,16 +1504,16 @@
 </aside>
 <div aria-label="Redimensionar panel lateral" aria-orientation="vertical" class="resize-handle" id="sidebarResizeHandle" role="separator" tabindex="0"></div>
 <!-- CONTENT AREA PRINCIPAL -->
-<main class="content-area lg-workspace-region" data-region="workspace">
+<main class="content-area lg-workspace-region">
 <div aria-label="Contenido principal" class="content lg-content" id="content" tabindex="-1">
 <div class="content-shell lg-content-shell">
 <section aria-label="Workspace context" class="workspace-context"><div class="context-title"><strong>MASTER BUS</strong><span>Live mastering workspace</span></div><div class="context-actions"></div></section><div class="lg-workspace-workspace-shell" id="lgmdmWorkspaceShell">
 <nav aria-label="Espacios de trabajo LGMDM" class="lg-workspace-workspace-tabs" role="tablist">
-<button aria-selected="true" class="lg-workspace-workspace-tab active" data-workspace="console" role="tab" type="button"><span class="lg-workspace-tab-icon">🎛</span>Console</button>
-<button aria-selected="false" class="lg-workspace-workspace-tab" data-workspace="analysis" role="tab" type="button"><span class="lg-workspace-tab-icon">📊</span>Analysis</button>
-<button aria-selected="false" class="lg-workspace-workspace-tab" data-workspace="presets" role="tab" type="button"><span class="lg-workspace-tab-icon">🎚</span>Presets</button>
+<button id="tab-console" aria-selected="true" aria-controls="console-workspace" class="lg-workspace-workspace-tab active" data-workspace="console" role="tab" type="button"><span class="lg-workspace-tab-icon" aria-hidden="true">🎛</span>Console</button>
+<button id="tab-analysis" aria-selected="false" aria-controls="analysis-workspace" class="lg-workspace-workspace-tab" data-workspace="analysis" role="tab" type="button"><span class="lg-workspace-tab-icon" aria-hidden="true">📊</span>Analysis</button>
+<button id="tab-presets" aria-selected="false" aria-controls="presets-workspace" class="lg-workspace-workspace-tab" data-workspace="presets" role="tab" type="button"><span class="lg-workspace-tab-icon" aria-hidden="true">🎚</span>Presets</button>
 </nav>
-<section class="lg-workspace-workspace console-workspace active" data-workspace="console" role="tabpanel">
+<section id="console-workspace" class="lg-workspace-workspace console-workspace active" data-workspace="console" role="tabpanel" aria-labelledby="tab-console">
 <section aria-label="LGMDM Mastering Console" class="lg-console" id="lgMasterConsole">
 <div class="lg-console-topbar">
 <div class="lg-console-title">
@@ -1603,19 +1612,14 @@
 <input aria-label="Ceiling del limitador" class="lg-console-slider" id="consoleLimiterFader" max="0.999" min="0.80" step="0.001" type="range" value="0.891"/>
 </section>
 <section class="lg-control-cluster ab-cluster">
-<div class="lg-control-title"><span>COMPARE</span><strong id="consoleAbReadout">MASTER</strong></div>
+<div class="lg-control-title"><span>COMPARE</span><strong id="consoleABReadout">MASTER</strong></div>
 <div class="lg-ab-controls">
 <button class="lg-ab-btn active" id="consoleABMaster" type="button">A · MASTER</button>
 <button class="lg-ab-btn" id="consoleABOriginal" type="button">B · ORIGINAL</button>
 </div>
 </section>
 </div>
-<div aria-label="Estado de módulos" class="lg-chain-control-strip">
-<button class="lg-stage-card" data-stage="input" type="button"><b>INPUT</b><span id="consoleInputGr">+0.0 dB</span><em id="consoleInputBypass">ACTIVE</em></button>
-<button class="lg-stage-card" data-stage="comp" type="button"><b>COMP</b><span id="consoleCompGr">GR 0.0 dB</span><em id="consoleCompBypass">ACTIVE</em></button>
-<button class="lg-stage-card" data-stage="stereo" type="button"><b>STEREO</b><span id="consoleStereoGr">WIDTH 100%</span><em id="consoleStereoBypass">ACTIVE</em></button>
-<button class="lg-stage-card" data-stage="limiter" type="button"><b>LIMITER</b><span id="consoleLimiterGr">GR 0.0 dB</span><em id="consoleLimiterBypass">ACTIVE</em></button>
-</div>
+
 <div class="lg-spectrum-row">
 <div class="lg-spectrum-panel" id="consoleSpectrumPanel">
 <div class="lg-panel-head compact">
@@ -1625,7 +1629,7 @@
 <div class="lg-spectrum-stage" id="consoleSpectrumStage">
 <canvas aria-label="Analizador de espectro en tiempo real" id="lgmdmConsoleSpectrum" width="800" height="200"></canvas>
 </div>
-<div class="spectrum-freq-scale" aria-hidden="true" style="display:flex;justify-content:space-between;padding:4px 8px;font-size:9px;color:var(--muted);font-family:ui-monospace,monospace;">
+<div class="spectrum-freq-scale" aria-hidden="true">
 <span>20Hz</span><span>50Hz</span><span>100Hz</span><span>250Hz</span><span>500Hz</span><span>1kHz</span><span>2.5kHz</span><span>5kHz</span><span>10kHz</span><span>20kHz</span>
 </div>
 </div>
@@ -1635,17 +1639,17 @@
 <button class="lg-mini-btn" id="consoleShowChain" type="button">ABRIR CADENA</button>
 </div>
 <div class="lg-chain">
-<button class="lg-chain-node active" data-pane="pane-cadena" type="button"><b>01</b><span>INPUT</span><em>−1.0 dB</em></button>
+<button class="lg-chain-node active" data-pane="pane-cadena" type="button"><b>01</b><span>INPUT</span><em>−1.0 dB</em><em id="consoleInputGr" class="lg-chain-gr">—</em></button>
 <span class="lg-chain-arrow">›</span>
 <button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>02</b><span>EQ</span><em>TONAL</em></button>
 <span class="lg-chain-arrow">›</span>
-<button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>03</b><span>COMP</span><em>GLUE</em></button>
+<button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>03</b><span>COMP</span><em>GLUE</em><em id="consoleCompGr" class="lg-chain-gr">GR 0.0 dB</em></button>
 <span class="lg-chain-arrow">›</span>
-<button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>04</b><span>STEREO</span><em>M/S</em></button>
+<button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>04</b><span>STEREO</span><em>M/S</em><em id="consoleStereoGr" class="lg-chain-gr">WIDTH 100%</em></button>
 <span class="lg-chain-arrow">›</span>
-<button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>05</b><span>LIMITER</span><em id="consoleLimiterReadout">CEILING −1.0</em></button>
+<button class="lg-chain-node" data-pane="pane-cadena" type="button"><b>05</b><span>LIMITER</span><em id="consoleLimiterReadout">CEILING −1.0</em><em id="consoleLimiterGr" class="lg-chain-gr">GR 0.0 dB</em></button>
 <span class="lg-chain-arrow">›</span>
-<button class="lg-chain-node output" data-pane="pane-salida" type="button"><b>06</b><span>OUTPUT</span><em id="consoleOutputReadout">-∞ LUFS</em></button>
+<button class="lg-chain-node output" data-pane="pane-salida" type="button"><b>06</b><span>OUTPUT</span><em id="consoleOutputReadout">-∞ LUFS</em><em id="consoleGlueGr" class="lg-chain-gr lg-chain-gr--hidden">GR 0.0 dB</em></button>
 </div>
 </div>
 </div>
@@ -1662,12 +1666,12 @@
 <div class="lg-transport-hint">SPACE · Play/Pause   ·   Ctrl+Shift+M · Master</div>
 </div>
 </section>
-<section class="lg-workspace-workspace analysis-workspace" data-workspace="analysis" role="tabpanel">
+<section id="analysis-workspace" class="lg-workspace-workspace analysis-workspace" data-workspace="analysis" role="tabpanel" aria-labelledby="tab-analysis" hidden>
 <!-- BUGFIX: waveform / resultados de Analizar / panel perceptual se
-     insertaban vía LGMDM.ui.getContent(), que apuntaba a #content (el shell
-     entero, fuera de las pestañas) — quedaban siempre visibles y
-     desacomodaban todo el layout en lugar de vivir acá adentro. Este div es
-     el contenedor que 09-visualizers.js ya buscaba por id pero no existía. -->
+ insertaban vía LGMDM.ui.getContent(), que apuntaba a #content (el shell
+ entero, fuera de las pestañas) — quedaban siempre visibles y
+ desacomodaban todo el layout en lugar de vivir acá adentro. Este div es
+ el contenedor que 09-visualizers.js ya buscaba por id pero no existía. -->
 <div id="analysisDynamicContent"></div>
 <section aria-label="Estado de salud del sistema" class="lg-health-panel" id="lgHealthPanel">
 <div class="lg-health-head">
@@ -1685,8 +1689,8 @@
 </section><div class="dashboard-wrap" id="dashboardWrap">
 <h3>
 <span class="dash-live-dot"></span>
-                Dashboard
-                <span class="meters-toggle" id="dashToggle">ocultar</span>
+ Dashboard
+ <span class="meters-toggle" id="dashToggle">ocultar</span>
 </h3>
 <div id="dashboardBody">
 <div class="dash-grid">
@@ -1719,10 +1723,10 @@
 </div>
 </div>
 </div>
-</div><div class="meters-wrap hidden-panel" id="metersWrap">
+</div><div class="meters-wrap" id="metersWrap">
 <h3>
-                Peak · RMS · LUFS · Stereo
-                <span class="meters-toggle" id="metersToggle">ocultar</span>
+ Peak · RMS · LUFS · Stereo
+ <span class="meters-toggle" id="metersToggle">ocultar</span>
 </h3>
 <div id="metersBody">
 <div class="meters-grid">
@@ -1891,26 +1895,18 @@
 <div class="lg-spectrum-stage" id="analysisSpectrumStage"><canvas aria-label="Espectro de análisis" id="lgmdmSpectrum"></canvas></div>
 </div>
 </section>
-<section class="lg-workspace-workspace presets-workspace" data-workspace="presets" role="tabpanel">
+<section id="presets-workspace" class="lg-workspace-workspace presets-workspace" data-workspace="presets" role="tabpanel" aria-labelledby="tab-presets" hidden>
 <div class="lg-workspace-preset-head"><div><h3>Preset Studio</h3><p>Aplicá un carácter al motor sin llenar la pantalla de controles.</p></div><span class="lg-workspace-preset-badge">EXPERT READY</span></div>
 <div class="lg-workspace-presets-grid" id="workspacePresetGrid"></div>
 </section>
 </section></div>
 <!-- /content-shell -->
-<!-- Proyectos section (hidden by default) -->
-<div class="projects-section-hidden" id="projects-section">
-<div id="projects-list-container"></div>
-<div id="project-detail-container"></div>
-</div>
 </div>
 <!-- /content -->
 </div>
 </main>
 </div>
 <!-- FOOTER -->
-<footer class="app-footer">
-<p>MASTER Audio Studio • Powered by Claude</p>
-</footer>
 <footer class="app-footer"><span>LGMDM V3 · REBUILD 01</span><span>Responsive audio engineering interface</span></footer></div>
 <!-- AI Assistant — canonical DOM contract -->
 <button aria-label="Abrir asistente de IA" class="ai-fab" id="aiFab" type="button">🤖<span aria-hidden="true" class="ai-fab-dot"></span></button>
@@ -1929,162 +1925,125 @@
 <div class="ai-panel-foot">El asistente usa el análisis técnico actual del track.</div>
 </section>
 <!-- SCRIPTS - Orden importante -->
-<script src="js/00-bootstrap.js?v=FIX26"></script>
-<script src="js/00-config.js?v=FIX26"></script>
-<script src="js/00-dom-safety.js?v=FIX26"></script>
-<script src="js/00-helpers.js?v=FIX26"></script>
-<!-- Fixes críticos (PRIMERO) -->
-<!-- 00-bug-fixes.js y 00-no-autoplay.js se sacaron: monkey-parcheaban
-       getElementById/fetch/setTimeout/setInterval/innerHTML/setAttribute/
-       createElement para TODA la app, de forma redundante con el fix real
-       (00-persistence.js + data-persist="false" + guard de isTrusted en
-       15-master-console.js) y con riesgo de romper cosas legitimas
-       (ej: el regex que borra la palabra "autoplay" de cualquier innerHTML,
-       o el que bloquea TODO setAttribute("autoplay",...) sin importar
-       si lo dispara una accion real del usuario). Los archivos siguen
-       en /js por si los necesitan de referencia, simplemente no se cargan. -->
-<script src="js/00-autoplay-fix.js?v=FIX26"></script>
-<script src="js/00-critical-fixes.js?v=FIX26"></script>
-<script src="js/00-button-handlers.js?v=FIX26"></script>
-<script src="js/00-api.js?v=FIX26"></script>
-<script src="js/00-web-workers.js?v=FIX26"></script>
-<script src="js/00-library-service.js?v=FIX26"></script>
-<script src="js/00-audio-engine.js?v=FIX26"></script>
-<script src="js/00-performance-monitoring.js?v=FIX26"></script>
-<!-- Core -->
-<script src="js/00-storage.js?v=FIX26"></script>
-<script src="js/00-ui-core.js?v=FIX26"></script>
-<script src="js/00-components.js?v=FIX26"></script>
-<script src="js/00-persistence.js?v=FIX26"></script>
-<script src="js/00-observability.js?v=FIX26"></script>
-<!-- Auth & State -->
-<script src="js/00-auth.js?v=FIX26"></script>
-<script src="js/01-state.js?v=FIX26"></script>
-<!-- Theme & Accessibility -->
-<script src="js/00-theme-manager.js?v=FIX26"></script>
-<script src="js/00-accessibility.js?v=FIX26"></script>
-<!-- UI Components -->
-<script src="js/02-sliders-ui.js?v=FIX26"></script>
-<script src="js/03-presets.js?v=FIX26"></script>
-<script src="js/04-file-handling.js?v=FIX26"></script>
-<!-- Visualizers -->
-<script src="js/05-eq-waveform.js?v=FIX26"></script>
-<script src="js/09-visualizers.js?v=FIX26"></script>
-<script src="js/10-meters-dashboard.js?v=FIX26"></script>
-<!-- Mastering -->
-<script src="js/06-params-builder.js?v=FIX26"></script>
-<script src="js/07-mastering-actions.js?v=FIX26"></script>
-<script src="js/08-reference-mastering.js?v=FIX26"></script>
-<!-- Advanced -->
-<script src="js/11-ai-assistant-ux.js?v=FIX26"></script>
-<script src="js/12-lufs-normalize.js?v=FIX26"></script>
-<script src="js/13-mixer-engine.js?v=FIX26"></script>
-<script src="js/13-mixer-library.js?v=FIX26"></script>
-<script src="js/13-mixer-model.js?v=FIX26"></script>
-<script src="js/13-mixer-ui.js?v=FIX26"></script>
-<script src="js/14-pitch-correction.js?v=FIX26"></script>
-<!-- UX & Features -->
-<script src="js/15-master-console.js?v=FIX26"></script>
-<script src="js/16-error-handling.js?v=FIX26"></script>
-<script src="js/19-performance-optimization.js?v=FIX26"></script>
-<script src="js/21-projects-ui.js?v=FIX26"></script>
-<script src="js/22-tabs-handler.js?v=FIX26"></script>
-<script src="js/24-compact-console-drawer.js?v=FIX26"></script>
-<script src="js/26-slider-wheel-control.js?v=FIX26"></script>
-<script src="js/28-ux-workflow.js?v=FIX26"></script>
-<script src="js/29-analysis-view.js?v=FIX26"></script>
-<!-- Utils & Extras -->
-<script src="js/25-workspace-tabs.js?v=FIX26"></script>
-<script src="js/30-metrics-store.js?v=FIX26"></script>
-<script src="js/30-preview-controller.js?v=FIX26"></script>
-<script src="js/31-spectrum-controller.js?v=FIX26"></script>
-<script src="js/32-chain-family-tabs.js?v=FIX26"></script>
-<script src="js/32-flex-layout.js?v=FIX26"></script>
-<script src="js/reference-library-picker.js?v=FIX26"></script>
-<!-- Existing features that were present but not loaded by the V3 entrypoint. -->
-<script src="js/17-keyboard-shortcuts.js?v=FIX26"></script>
-<script src="js/18-undo-redo.js?v=FIX26"></script>
-<script src="js/20-pro-upgrades.js?v=FIX26"></script>
-<script src="js/23-pro-console.js?v=FIX26"></script>
-<script src="js/33-studio-controller.js?v=FIX26"></script>
-<script src="js/27-health-tooltips.js?v=FIX26"></script>
-<!-- F5.1 — Pro features widgets (Sprint 4) -->
-<script src="js/pro-features/loudness-penalty-widget.js?v=FIX26"></script>
-<script src="js/pro-features/spectral-tilt-widget.js?v=FIX26"></script>
-<script src="js/pro-features/ms-imager-widget.js?v=FIX26"></script>
-<script src="js/pro-features/reference-match-widget.js?v=FIX26"></script>
-<script src="js/pro-features/saturation-widget.js?v=FIX26"></script>
-<script src="js/pro-features/phase-rotation-widget.js?v=FIX26"></script>
-<script src="js/pro-features/multiband-transient-widget.js?v=FIX26"></script>
-<script src="js/pro-features/dr-meter-widget.js?v=FIX26"></script>
-<script src="js/pro-features/reverb-widget.js?v=FIX26"></script>
-<script src="js/pro-features/loudness-war-widget.js?v=FIX26"></script>
-<script src="js/34-premium-suite.js?v=FIX26"></script>
+<script defer src="js/00-utils.js"></script>
+<script defer src="js/00-ui-core.js"></script>
+<script defer src="js/00-config.js"></script>
+<script defer src="js/00-dom-safety.js"></script>
+<script defer src="js/00-storage.js"></script>
+<script defer src="js/00-api.js"></script>
+<script defer src="js/00-theme-manager.js"></script>
+<script defer src="js/00-audio-engine.js"></script>
+<script defer src="js/00-auth.js"></script>
+<script defer src="js/00-compat.js"></script>
+<script defer src="js/01-state.js"></script>
+<script defer src="js/02-sliders-ui.js"></script>
+<script defer src="js/03-presets.js"></script>
+<script defer src="js/04-file-handling.js"></script>
+<script defer src="js/05-eq-waveform.js"></script>
+<script defer src="js/06-params-builder.js"></script>
+<script defer src="js/07-mastering-actions.js"></script>
+<script defer src="js/08-reference-mastering.js"></script>
+<script defer src="js/09-visualizers.js"></script>
+<script defer src="js/10-meters-dashboard.js"></script>
+<script defer src="js/11-ai-assistant-ux.js"></script>
+<script defer src="js/12-lufs-normalize.js"></script>
+<script defer src="js/13-mixer.js"></script>
+<script defer src="js/13-mixer-ui.js"></script>
+<script defer src="js/14-pitch-correction.js"></script>
+<script defer src="js/15-master-console.js"></script>
+<script defer src="js/17-keyboard-shortcuts.js"></script>
+<script defer src="js/18-undo-redo.js"></script>
+<script defer src="js/20-pro-upgrades.js"></script>
+<script defer src="js/22-tabs-handler.js"></script>
+<script defer src="js/25-workspace-tabs.js"></script>
+<script defer src="js/29-analysis-view.js"></script>
+<script defer src="js/30-metrics-store.js"></script>
+<script defer src="js/30-preview-controller.js"></script>
+<script defer src="js/32-chain-family-tabs.js"></script>
+<script defer src="js/32-flex-layout.js"></script>
+<script defer src="js/33-studio-controller.js"></script>
+<script defer src="js/34-premium-suite.js"></script>
+<script defer src="js/insert-base.js"></script>
+<script defer src="js/pro-insert-rack.js"></script>
+<script defer src="js/reference-library-picker.js"></script>
+<script defer src="js/pro-features/cross-demask-widget.js"></script>
+<script defer src="js/pro-features/dr-meter-widget.js"></script>
+<script defer src="js/pro-features/iso-compensation-widget.js"></script>
+<script defer src="js/pro-features/loudness-penalty-widget.js"></script>
+<script defer src="js/pro-features/loudness-war-widget.js"></script>
+<script defer src="js/pro-features/ms-imager-widget.js"></script>
+<script defer src="js/pro-features/multiband-transient-widget.js"></script>
+<script defer src="js/pro-features/phantom-sub-widget.js"></script>
+<script defer src="js/pro-features/phase-rotation-widget.js"></script>
+<script defer src="js/pro-features/reference-match-widget.js"></script>
+<script defer src="js/pro-features/resonance-tamer-widget.js"></script>
+<script defer src="js/pro-features/reverb-widget.js"></script>
+<script defer src="js/pro-features/saturation-widget.js"></script>
+<script defer src="js/pro-features/spectral-tilt-widget.js"></script>
 <!-- Global Notifications and Utility Targets -->
 <div id="toast-container" class="toast-container" aria-live="polite"></div>
-<span id="lufsNumber" style="display:none;" aria-hidden="true">--</span>
 
 <!-- Templates para Mixer de Stems -->
 <template id="tmpl-eqband">
-  <div class="mxr-eqband">
-    <div class="mxr-eqband-label"></div>
-    <div class="mxr-eqband-row">
-      <span class="mxr-eqband-tag">Frec.</span>
-      <input type="range" data-param="eq_freq" min="40" max="18000" step="10">
-      <span class="mxr-eqband-val"></span>
-    </div>
-    <div class="mxr-eqband-row">
-      <span class="mxr-eqband-tag">Gan.</span>
-      <input type="range" data-param="eq_gain_db" min="-12" max="12" step="0.5">
-      <span class="mxr-eqband-val"></span>
-    </div>
-    <div class="mxr-eqband-row">
-      <span class="mxr-eqband-tag">Q</span>
-      <input type="range" data-param="eq_q" min="0.3" max="4" step="0.1">
-      <span class="mxr-eqband-val"></span>
-    </div>
-  </div>
+ <div class="mxr-eqband">
+ <div class="mxr-eqband-label"></div>
+ <div class="mxr-eqband-row">
+ <span class="mxr-eqband-tag">Frec.</span>
+ <input type="range" data-param="eq_freq" min="40" max="18000" step="10">
+ <span class="mxr-eqband-val"></span>
+ </div>
+ <div class="mxr-eqband-row">
+ <span class="mxr-eqband-tag">Gan.</span>
+ <input type="range" data-param="eq_gain_db" min="-12" max="12" step="0.5">
+ <span class="mxr-eqband-val"></span>
+ </div>
+ <div class="mxr-eqband-row">
+ <span class="mxr-eqband-tag">Q</span>
+ <input type="range" data-param="eq_q" min="0.3" max="4" step="0.1">
+ <span class="mxr-eqband-val"></span>
+ </div>
+ </div>
 </template>
 
 <template id="tmpl-channel">
-  <div class="mxr-channel" data-stem="">
-    <div class="mxr-ch-header">
-      <span class="mxr-ch-emoji"></span>
-      <span class="mxr-ch-name"></span>
-      <button class="mxr-ch-close" data-stem="">✕</button>
-    </div>
-    <div class="lgjs-s-6b99de8b">⏳ Subiendo…</div>
-    <div class="mxr-fader-area">
-      <div class="mxr-db-scale">
-        <span>+12</span><span>+6</span><span>0</span>
-        <span>-6</span><span>-12</span><span>-∞</span>
-      </div>
-      <div class="mxr-fader-placeholder"></div>
-      <div class="mxr-fader-val"></div>
-    </div>
-    <div class="mxr-vu-wrap">
-      <div class="mxr-vu-bar"><div class="mxr-vu-fill"></div></div>
-      <div class="mxr-vu-bar"><div class="mxr-vu-fill"></div></div>
-    </div>
-    <div class="mxr-pan-row">
-      <span class="mxr-pan-label">L</span>
-      <input type="range" class="mxr-pan-slider" data-param="pan" min="-1" max="1" step="0.05" value="0">
-      <span class="mxr-pan-label">R</span>
-      <span class="mxr-pan-val"></span>
-    </div>
-    <div class="mxr-ms-row">
-      <button class="mxr-btn-ms" data-action="mute">M</button>
-      <button class="mxr-btn-ms" data-action="solo">S</button>
-      <button class="mxr-btn-ms mxr-reset-btn" data-action="reset" title="Resetear canal">↺</button>
-    </div>
-    <details class="mxr-ch-details" open>
-      <summary>⚙ Controles del canal</summary>
-      <div class="mxr-adv-section">Filtros</div>
-      <div class="param"><label>HP</label><span class="val"></span><input type="range" data-param="hp_cutoff_hz" min="20" max="500" step="5"></div>
-      <div class="param"><label>LP</label><span class="val"></span><input type="range" data-param="lp_cutoff_hz" min="2000" max="20000" step="100"></div>
-      <div class="mxr-adv-section">EQ 4 bandas</div>
-      <div class="eq-bands-container"></div>
-    </details>
-  </div>
+ <div class="mxr-channel" data-stem="">
+ <div class="mxr-ch-header">
+ <span class="mxr-ch-emoji"></span>
+ <span class="mxr-ch-name"></span>
+ <button class="mxr-ch-close" data-stem="">✕</button>
+ </div>
+ <div class="mxr-ch-uploading">⏳ Subiendo…</div>
+ <div class="mxr-fader-area">
+ <div class="mxr-db-scale">
+ <span>+12</span><span>+6</span><span>0</span>
+ <span>-6</span><span>-12</span><span>-∞</span>
+ </div>
+ <div class="mxr-fader-placeholder"></div>
+ <div class="mxr-fader-val"></div>
+ </div>
+ <div class="mxr-vu-wrap">
+ <div class="mxr-vu-bar"><div class="mxr-vu-fill"></div></div>
+ <div class="mxr-vu-bar"><div class="mxr-vu-fill"></div></div>
+ </div>
+ <div class="mxr-pan-row">
+ <span class="mxr-pan-label">L</span>
+ <input type="range" class="mxr-pan-slider" data-param="pan" min="-1" max="1" step="0.05" value="0">
+ <span class="mxr-pan-label">R</span>
+ <span class="mxr-pan-val"></span>
+ </div>
+ <div class="mxr-ms-row">
+ <button class="mxr-btn-ms" data-action="mute">M</button>
+ <button class="mxr-btn-ms" data-action="solo">S</button>
+ <button class="mxr-btn-ms mxr-reset-btn" data-action="reset" title="Resetear canal">↺</button>
+ </div>
+ <details class="mxr-ch-details" open>
+ <summary class="details-summary">⚙ Controles del canal</summary>
+ <div class="mxr-adv-section">Filtros</div>
+ <div class="param"><label>HP</label><span class="val"></span><input type="range" data-param="hp_cutoff_hz" min="20" max="500" step="5"></div>
+ <div class="param"><label>LP</label><span class="val"></span><input type="range" data-param="lp_cutoff_hz" min="2000" max="20000" step="100"></div>
+ <div class="mxr-adv-section">EQ 4 bandas</div>
+ <div class="eq-bands-container"></div>
+ </details>
+ </div>
 </template>
 </body></html>

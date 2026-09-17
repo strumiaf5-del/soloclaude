@@ -1,6 +1,8 @@
 // ============================================================
 // 01-state.js — Estado global, cache de colores, tema, IA estado
 // ============================================================
+(function () {
+  'use strict';
       // ── State ─────────────────────────────────────────────────────────────────────
       const MAX_FILE_BYTES = window.LGMDM?.config?.maxFileBytes ?? (200 * 1024 * 1024);
       const MAX_FILE_MB = window.LGMDM?.config?.maxFileMb ?? 200;
@@ -36,29 +38,73 @@
       let currentJobId = null;
       let pollInterval = null;
       let downloadUrl = null;
+      // FIX MX-12 — stems separados (objeto {stemName: File|info, ...} + available[]).
+      // Nullable hasta que el flujo de "Separar Stems" complete y emita `stems-loaded`.
+      // Los widgets Pro (cross-demask, etc.) lo consultan para condicionar su UI.
+      let _stems = null;
 
       // ── Cache de colores del tema ────────────────────────────────────────────────
-      // Las variables --bg/--accent/etc. son fijas (no hay theme switcher), así que
-      // evitamos forzar un recálculo de estilos (getComputedStyle) en cada redibujo
-      // de canvas (EQ curve, waveform, FFT) — se lee una sola vez y se reusa.
+      // Se cachean para evitar getComputedStyle() en cada frame de animación/canvas.
+      // Se invalida reactivamente ante eventos 'themechange'.
       let _themeColorsCache = null;
+      window.addEventListener("themechange", () => {
+        _themeColorsCache = null;
+      });
+
+      const LEGACY_COLOR_MAP = {
+        "--bg": "--ui-bg",
+        "--bg-2": "--ui-surface",
+        "--surface": "--ui-surface",
+        "--surface2": "--ui-surface-2",
+        "--surface3": "--ui-surface-3",
+        "--glass": "--ui-panel",
+        "--glass2": "--ui-panel-strong",
+        "--border": "--ui-border",
+        "--border2": "--ui-border-2",
+        "--amber": "--ui-warn",
+        "--amber2": "--ui-warn-2",
+        "--amber-glow": "--ui-warn-glow",
+        "--vu-green": "--ui-good",
+        "--vu-yellow": "--ui-warn",
+        "--clip-red": "--ui-danger",
+        "--cyan": "--ui-accent",
+        "--lilac": "--ui-accent-2",
+        "--text": "--ui-text",
+        "--muted": "--ui-muted",
+        "--faint": "--ui-faint",
+        "--accent": "--ui-accent",
+        "--accent-2": "--ui-accent-2",
+        "--green": "--ui-good",
+        "--yellow": "--ui-warn",
+        "--red": "--ui-danger",
+      };
+
       function themeColors() {
         if (_themeColorsCache) return _themeColorsCache;
         const styles = getComputedStyle(document.documentElement);
         const read = (name) => styles.getPropertyValue(name).trim();
         _themeColorsCache = {
-          bg: read("--bg"),
-          surface: read("--surface"),
-          surface2: read("--surface2"),
-          border: read("--border"),
-          accent: read("--accent"),
-          accent2: read("--accent2"),
-          green: read("--green"),
-          yellow: read("--yellow"),
-          red: read("--red"),
-          text: read("--text"),
-          muted: read("--muted"),
-          get: (varName) => read(varName), // fallback para nombres arbitrarios tipo '--foo'
+          bg: read("--ui-bg"),
+          surface: read("--ui-surface"),
+          surface2: read("--ui-surface-2"),
+          surface3: read("--ui-surface-3"),
+          border: read("--ui-border"),
+          accent: read("--ui-accent"),
+          accent2: read("--ui-accent-2"),
+          good: read("--ui-good"),
+          warn: read("--ui-warn"),
+          danger: read("--ui-danger"),
+          text: read("--ui-text"),
+          muted: read("--ui-muted"),
+          faint: read("--ui-faint"),
+          panel: read("--ui-panel"),
+          panelStrong: read("--ui-panel-strong"),
+          get: (varName) => {
+            if (!varName) return "";
+            const key = varName.startsWith("--") ? varName : `--${varName}`;
+            const mapped = LEGACY_COLOR_MAP[key] || key;
+            return read(mapped) || read(key);
+          },
         };
         return _themeColorsCache;
       }
@@ -123,8 +169,57 @@
       const _publicState = window.LGMDM?.state || (window.LGMDM = window.LGMDM || {}, window.LGMDM.state = {});
       _publicState.reference = _publicState.reference || { file: null, libraryId: null };
       _publicState.runtime = _publicState.runtime || { preview: {}, reference: _publicState.reference, audio: {} };
-      Object.defineProperty(_publicState, "selectedFile", { get: () => selectedFile, set: (value) => { selectedFile = value; }, configurable: true });
+      Object.defineProperty(_publicState, "selectedFile", {
+        get: () => selectedFile,
+        set: (value) => {
+          selectedFile = value;
+          // FIX MX-11 — pipeline → Insert Rack: al cambiar el archivo,
+          // dispara processAll() sobre los inserts activos. Manejo defensivo:
+          // ignora null/undefined y captura errores para no tumbar la carga de pista.
+          if (value && window.LGMDM?.proInsertRack?.processAll) {
+            window.LGMDM.proInsertRack.processAll(value).catch((err) => {
+              if (typeof console !== 'undefined') console.warn('[insert-rack] processAll failed:', err);
+            });
+          }
+        },
+        configurable: true
+      });
       Object.defineProperty(_publicState, "lastAnalysisData", { get: () => lastAnalysisData, set: (value) => { lastAnalysisData = value; }, configurable: true });
+      // FIX MX-12 — stems: getter/setter autoritativo. La asignación dispara
+      // el evento `stems-loaded` para que widgets Pro (cross-demask, etc.)
+      // actualicen su UI sin polling ni MutationObserver explícito.
+      Object.defineProperty(_publicState, "stems", {
+        get: () => _stems,
+        set: (value) => {
+          _stems = value;
+          if (value && (value.available?.length || Object.keys(value.stems || {}).length)) {
+            window.dispatchEvent(new CustomEvent('stems-loaded', { detail: { stems: value } }));
+          }
+        },
+        configurable: true,
+      });
+      _publicState.setStems = function setStems(payload) {
+        // Helper canónico para que el flujo de separación (07-mastering-actions.js)
+        // pueble el state de forma uniforme. `payload` puede ser:
+        //   { stems: {vocals: {..}, ...}, available: ['vocals','drums',...] }
+        // Acepta también un array (legacy): se mapea a { stems: {}, available: [...] }
+        let next = null;
+        if (payload == null) {
+          next = null;
+        } else if (Array.isArray(payload)) {
+          next = { stems: {}, available: payload.slice() };
+        } else if (typeof payload === 'object') {
+          next = {
+            stems: payload.stems && typeof payload.stems === 'object' ? payload.stems : {},
+            available: Array.isArray(payload.available) ? payload.available.slice() : Object.keys(payload.stems || {}),
+          };
+        }
+        _publicState.stems = next;
+        return _publicState.stems;
+      };
+      _publicState.clearStems = function clearStems() {
+        _publicState.stems = null;
+      };
       // Cross-script bridges for plain `<script>` consumers (non-module scope sharing).
       _publicState.cachedFileBuffer = _publicState.cachedFileBuffer || null;
       _publicState.metersRafId = _publicState.metersRafId || null;
@@ -132,21 +227,37 @@
       _publicState.metersSourceNode = _publicState.metersSourceNode || null;
       _publicState._previewLibraryId = _publicState._previewLibraryId || null;
       _publicState._previewSessionId = _publicState._previewSessionId || null;
-      for (const key of ["selectedFile", "lastAnalysisData"]) {
+      const SHARED_KEYS = [
+        'selectedFile', 'lastAnalysisData',
+        'cachedFileBuffer', '_previewSessionId', '_previewLibraryId',
+        'currentJobId', 'pollInterval', 'previewAudioUrl'
+      ];
+      for (const key of SHARED_KEYS) {
         const existing = Object.getOwnPropertyDescriptor(window, key);
         if (!existing || existing.configurable) {
           Object.defineProperty(window, key, {
             configurable: true,
-            get: () => {
-              console.warn(`[LGMDM state] window.${key} está deprecado. Usá LGMDM.state.${key} en su lugar.`);
-              return _publicState[key];
-            },
-            set: (value) => {
-              console.warn(`[LGMDM state] window.${key} está deprecado. Usá LGMDM.state.${key} en su lugar.`);
-              _publicState[key] = value;
-            },
+            get: () => _publicState[key],
+            set: (value) => { _publicState[key] = value; },
           });
         }
       }
 
+      // Expose utility functions + theme colors to consumers
+      window.LGMDM = window.LGMDM || {};
+      window.LGMDM.formatters = Object.freeze({
+        formatDbValue, formatLinearThresholdToDb, genUUID,
+        getTrackBaseName, currentTrackNameParam, prefillTrackNameFromFile,
+      });
+      window.LGMDM.themeColors = themeColors;
+      window.formatDbValue = formatDbValue;
+      window.formatLinearThresholdToDb = formatLinearThresholdToDb;
+      window.genUUID = genUUID;
+      window.getTrackBaseName = getTrackBaseName;
+      window.currentTrackNameParam = currentTrackNameParam;
+      window.prefillTrackNameFromFile = prefillTrackNameFromFile;
+      window.themeColors = themeColors;
+
       // ── Sliders ──────────────────────────────────────────────────────────────────
+
+})();

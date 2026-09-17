@@ -290,24 +290,11 @@ aiEl("aiInput")?.addEventListener("input", function () {
 });
 
 // ── Sidebar tabs ──────────────────────────────────────────────
+// FIX: tab click handler removed — 22-tabs-handler.js is the authoritative
+// sidebar navigation. The previous in-file handler referenced an undeclared
+// `container` variable (line 316) which threw ReferenceError on every click
+// and stopped the Cadena/Salida/Mixer panes from ever becoming visible.
 (function () {
-  const tabs = document.querySelectorAll("#sidebarTabs .sidebar-tab");
-  const container = document.getElementById("sidebarPaneContainer");
-  const paneMap = { "pane-archivo": "archivo", "pane-cadena": "cadena", "pane-salida": "salida" };
-  const detailsMap = { "pane-archivo": "pasoArchivo", "pane-cadena": "pasoCadena", "pane-salida": "pasoSalida" };
-
-  function switchTab(tab) {
-    tabs.forEach((t) => t.classList.remove("active"));
-    tab.classList.add("active");
-    const pane = tab.dataset.pane;
-    const cls = paneMap[pane];
-    container.className = container.className.replace(/sidebar-showing-\w+/g, "").trim();
-    container.classList.add("sidebar-showing-" + cls);
-    const det = document.getElementById(detailsMap[pane]);
-    if (det && !det.open) det.setAttribute("open", "");
-  }
-
-  tabs.forEach((tab) => tab.addEventListener("click", () => switchTab(tab)));
   const paso1 = document.getElementById("pasoArchivo");
   const paso2 = document.getElementById("pasoCadena");
   const paso3 = document.getElementById("pasoSalida");
@@ -346,7 +333,34 @@ aiEl("aiInput")?.addEventListener("input", function () {
 })();
 
 // Se eliminó la línea que hacía referencia a window._origSetFile
-(function(){ const LG = window.LGMDM = window.LGMDM || {}; LG.ai = Object.assign(LG.ai || {}, { setContext }); })();
+(function(){
+  const LG = window.LGMDM = window.LGMDM || {};
+  LG.ai = Object.assign(LG.ai || {}, { setContext });
+  LG.analysis = Object.assign(LG.analysis || {}, {
+    async request() {
+      const file = window.LGMDM?.state?.selectedFile;
+      if (!file) {
+        window.LGMDM?.ui?.showStatus?.(null, "Cargá un archivo antes de analizar.", "error");
+        return null;
+      }
+      const fd = new FormData();
+      fd.append("file", file);
+      const libId = window.LGMDM?.state?._previewLibraryId;
+      if (libId) fd.append("library_id", libId);
+      try {
+        const res = await window.LGMDM.api.apiFetch("/analysis/analyze", { method: "POST", body: fd });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data?.analysis) window.LGMDM.ai?.setContext?.(data.analysis);
+        return data;
+      } catch (e) {
+        console.error("[analysis] request failed:", e);
+        window.LGMDM?.ui?.showStatus?.(null, "Error: " + e.message, "error");
+        throw e;
+      }
+    },
+  });
+})();
 
 // 07-mastering-actions.js corre fuera de este IIFE y llama a estas
 // funciones directamente (sin prefijo LGMDM.ai.), asi que quedan

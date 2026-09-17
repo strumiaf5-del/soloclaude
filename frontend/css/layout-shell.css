@@ -2,14 +2,20 @@
    FIX18: .main-container > .sidebar | #sidebarResizeHandle | .content-area
    owns the app shell. Legacy component styles stay in lgmdm.css. */
 
+/* Tokens estructurales compartidos viven en tokens.css.
+   Solo definimos aquí --lg-pir-docked-h (scoped a este archivo). */
 :root {
-  --lg-shell-header-h: clamp(48px, 4.2vh, 62px);
-  --lg-sidebar-w: clamp(250px, 22vw, 520px);
-  --lg-sidebar-min-w: 250px;
-  --lg-sidebar-max-w: min(620px, 65vw);
-  --lg-handle-w: 8px;
-  --lg-content-pad-x: clamp(8px, 1.2vw, 20px);
-  --lg-content-pad-y: clamp(8px, 1.2vh, 18px);
+  --lg-pir-docked-h: 220px;
+}
+
+/* Pro Insert Rack docked (220px fixed bottom) — compensar padding del content
+   para que los últimos controles (download, report, transport) no queden tapados. */
+body:has(.pro-insert-rack--docked) .content-area {
+  padding-bottom: calc(var(--lg-content-pad-y) + var(--lg-pir-docked-h));
+}
+body:has(.pro-insert-rack--docked) .ai-fab,
+body:has(.pro-insert-rack--docked) .theme-toast {
+  bottom: calc(var(--lg-pir-docked-h) + 24px);
 }
 
 html, body {
@@ -61,6 +67,7 @@ body {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  z-index: var(--z-base, 0);
 }
 
 .main-container > #sidebarResizeHandle {
@@ -72,7 +79,7 @@ body {
   height: 100%;
   position: relative;
   inset: auto;
-  z-index: 400;
+  z-index: var(--z-handle, 400);
   cursor: col-resize;
   touch-action: none;
   user-select: none;
@@ -115,7 +122,8 @@ body {
   padding: var(--lg-content-pad-y) var(--lg-content-pad-x);
 }
 
-.main-container > .content-area > .content-shell {
+.main-container > .content-area .content-shell,
+.main-container > .content-area > .content {
   width: min(100%, 1480px);
   max-width: 1480px;
   min-width: 0;
@@ -144,10 +152,27 @@ body {
 
 #sidebarCollapseBtn,
 .sidebar-toggle-btn {
-  position: fixed;
-  left: calc(var(--lg-sidebar-w) - 13px);
-  top: clamp(58px, 8vh, 88px);
-  z-index: 500;
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 100%;
+  min-height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--ui-muted);
+  cursor: pointer;
+  font-size: 11px;
+  transition: color .15s ease, background .15s ease;
+}
+
+#sidebarCollapseBtn:hover,
+.sidebar-toggle-btn:hover {
+  color: var(--ui-text);
+  background: var(--surface-soft);
 }
 
 .main-container.sidebar-collapsed {
@@ -166,7 +191,17 @@ body {
 
 .main-container.sidebar-collapsed #sidebarCollapseBtn,
 .main-container.sidebar-collapsed .sidebar-toggle-btn {
-  left: 8px;
+  position: fixed;
+  left: 6px;
+  top: 64px;
+  z-index: 500;
+  width: 28px;
+  height: 28px;
+  background: var(--surface-soft);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  color: var(--ui-text);
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
 }
 
 body.lgmdm-layout-dragging,
@@ -198,7 +233,7 @@ body.lgmdm-layout-dragging * {
     height: auto;
     max-height: 200px;
     border-right: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--ui-border);
   }
 
   .main-container > #sidebarResizeHandle {

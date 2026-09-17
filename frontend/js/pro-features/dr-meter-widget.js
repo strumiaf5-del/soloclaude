@@ -24,12 +24,6 @@
     return { genre: 'Loud', label: 'Loud / Loudness War', tone: '#ff5f72' };
   }
 
-  function clamp(n, lo, hi) {
-    n = Number(n);
-    if (!Number.isFinite(n)) return lo;
-    return Math.max(lo, Math.min(hi, n));
-  }
-
   // Mapea valor DR (2..20) a ángulo del arco semicircular.
   // Semicírculo va de π (izquierda) a 0 (derecha), "needle pivot" arriba.
   function drToAngle(dr) {
@@ -42,7 +36,7 @@
     return Math.PI * (1 - t);
   }
 
-  class DrMeterWidget {
+  class drMeterWidget {
     constructor() {
       this.canvas = null;
       this.root = null;
@@ -78,7 +72,7 @@
           <strong class="pro-card-title" style="font-size:.78rem;">
             📊 Dynamic Range (DR) Meter
           </strong>
-          <span id="drwCrest" style="font-size:.62rem;color:var(--muted,#9ba6c4);">
+          <span id="drwCrest" style="font-size:.62rem;color:var(--ui-muted,#9ba6c4);">
             Crest Factor: — dB
           </span>
         </div>
@@ -98,7 +92,7 @@
                 Heavy
               </span>
             </div>
-            <div id="drwDesc" style="font-size:.72rem;color:var(--muted,#9ba6c4);
+            <div id="drwDesc" style="font-size:.72rem;color:var(--ui-muted,#9ba6c4);
                                     text-align:center;max-width:320px;">
               DR-12 — Heavy / Dinámico / Competition-ready
             </div>
@@ -109,7 +103,7 @@
                  style="padding:.7rem;border-radius:12px;background:rgba(255,255,255,.025);
                         border:1px solid rgba(255,255,255,.06);">
               <span style="font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;
-                           color:var(--muted,#9ba6c4);">
+                           color:var(--ui-muted,#9ba6c4);">
                 Loudness Range (LRA)
               </span>
               <div style="position:relative;margin-top:.4rem;">
@@ -122,7 +116,7 @@
                 </div>
               </div>
               <div id="drwLraHint"
-                   style="font-size:.62rem;color:var(--muted,#9ba6c4);margin-top:.2rem;text-align:center;">
+                   style="font-size:.62rem;color:var(--ui-muted,#9ba6c4);margin-top:.2rem;text-align:center;">
                 EBU R128 LRA target: 4–12 LU
               </div>
             </div>
@@ -130,14 +124,14 @@
                  style="padding:.7rem;border-radius:12px;background:rgba(255,255,255,.025);
                         border:1px solid rgba(255,255,255,.06);">
               <span style="font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;
-                           color:var(--muted,#9ba6c4);">
+                           color:var(--ui-muted,#9ba6c4);">
                 Crest Factor
               </span>
               <div id="drwCrestBig"
                    style="font-size:1.4rem;font-weight:800;color:#dcfbff;margin-top:.2rem;">
                 — dB
               </div>
-              <div style="font-size:.62rem;color:var(--muted,#9ba6c4);margin-top:.2rem;">
+              <div style="font-size:.62rem;color:var(--ui-muted,#9ba6c4);margin-top:.2rem;">
                 Peak / RMS ratio (dB). Higher = más dinámica.
               </div>
             </div>
@@ -200,7 +194,7 @@
               Heavy
             </span>
           </div>
-          <div style="font-size:.72rem;color:var(--muted,#9ba6c4);text-align:center;">
+          <div style="font-size:.72rem;color:var(--ui-muted,#9ba6c4);text-align:center;">
             Clasificación de género basada en rango dinámico.
           </div>
         </div>
@@ -510,6 +504,27 @@
     }
   }
 
-  LG.proFeatures.DrMeterWidget = DrMeterWidget;
-  global.DrMeterWidget = DrMeterWidget;
+  LG.proFeatures.drMeterWidget = drMeterWidget;
+  if (typeof module !== 'undefined' && module.exports) module.exports = { drMeterWidget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // CATALOG key = 'dr-meter'. La entry actual no define defaults (defaults
+  // vienen de `_applyOptions`); la usamos para serialize/restore.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['dr-meter']) {
+      const inst = rack.create({
+        id: 'dr-meter', title: '📊 DR Meter', endpoint: '/dsp/dr-meter', widget: drMeterWidget
+      });
+      if (inst) {
+        drMeterWidget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['dr-meter'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'dr-meter', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);
+

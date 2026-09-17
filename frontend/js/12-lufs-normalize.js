@@ -13,9 +13,9 @@
   function setStatus(text, kind) {
     if (!statusEl) return;
     statusEl.textContent = text;
-    statusEl.style.color = kind === "error" ? "var(--danger, #f87171)"
-                          : kind === "ok" ? "var(--accent2, #34d399)"
-                          : "var(--muted)";
+    statusEl.style.color = kind === "error" ? "var(--ui-danger, #f87171)"
+                          : kind === "ok" ? "var(--ui-good, #34d399)"
+                          : "var(--ui-muted)";
   }
 
   btn.addEventListener("click", async () => {

@@ -9,10 +9,14 @@
   function parseBrowser(userAgent) {
     const operaMatch = userAgent.match(/OPR\/(\d+)/);
     if (operaMatch) return { name: 'opera', version: parseInt(operaMatch[1], 10) };
+    const edgMatch = userAgent.match(/Edg(?:e|iOS)?\/(\d+)/);
+    if (edgMatch) return { name: 'edge', version: parseInt(edgMatch[1], 10) };
     const chromeMatch = userAgent.match(/(?:Chrome|CriOS)\/(\d+)/);
     if (chromeMatch) return { name: 'chrome', version: parseInt(chromeMatch[1], 10) };
     const firefoxMatch = userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatch) return { name: 'firefox', version: parseInt(firefoxMatch[1], 10) };
+    const safariMatch = userAgent.match(/Version\/(\d+)(?:\.\d+)*.*Safari/);
+    if (safariMatch) return { name: 'safari', version: parseInt(safariMatch[1], 10) };
     return null;
   }
 
@@ -29,11 +33,13 @@
 
   function isSupported() {
     const browser = parseBrowser(navigator.userAgent);
-    if (!browser) return false;
+    if (!browser) return hasRequiredCapabilities();
     if (browser.name === 'chrome' && browser.version >= 108) return true;
     if (browser.name === 'firefox' && browser.version >= 108) return true;
     if (browser.name === 'opera' && browser.version >= 94) return true;
-    return false;
+    if (browser.name === 'edge' && browser.version >= 108) return true;
+    if (browser.name === 'safari' && browser.version >= 16) return true;
+    return hasRequiredCapabilities();
   }
 
   function showCompatWall() {
@@ -65,13 +71,6 @@
       });
     }
   }
-
-  window.LGMDM = window.LGMDM || {};
-  window.LGMDM.compat = {
-    isSupported,
-    getBrowser: () => parseBrowser(navigator.userAgent),
-    hasRequiredCapabilities,
-  };
 
   document.addEventListener('DOMContentLoaded', () => {
     if (!isSupported() || !hasRequiredCapabilities()) {

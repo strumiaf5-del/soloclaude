@@ -240,4 +240,23 @@
 
   NS.proFeatures.msImagerWidget = Widget;
   if (typeof module !== 'undefined' && module.exports) module.exports = { Widget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Frontend-only: correlación M/S + width slider local, sin /dsp/*.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['ms-imager']) {
+      const inst = rack.create({
+        id: 'ms-imager', title: '📐 M/S Imager', widget: Widget
+      });
+      if (inst) {
+        Widget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['ms-imager'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'ms-imager', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,10 +1,9 @@
 // ============================================================
-// 34-premium-suite.js — Suite Premium (12 módulos Pro) para Mastering Studio
+// 34-premium-suite.js — Suite Premium (22 módulos: compliance + 21 Pro) para Mastering Studio
 // ============================================================
-// TODO 2026-09-14: tests F13 outdated since 2 JS dead files removed.
-//   - test_tier1_features.py:753 asserts literal "62" JS files (current: 60)
-//   - test_tier1_features.py:770 references deleted file "13-mixer.js"
-//   Tests must NOT be touched per user instruction; debt tracked here.
+// 2026-09-15: bloque TODO obsoleto eliminado (test_tier1_features.py corregido
+//   fuera de este archivo; las refs a "13-mixer.js" y "62 scripts" no aplican
+//   desde la limpieza de dead code de 2026-09-14).
 // ============================================================
 (function (global) {
   'use strict';
@@ -12,6 +11,8 @@
   const LG = global.LGMDM = global.LGMDM || {};
   const el = (id) => document.getElementById(id);
   const escapeHtml = LG.ui?.escapeHtml || ((str) => String(str ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])));
+  const getSelectedFile = () => (typeof LGMDM !== 'undefined' && LGMDM.state?.selectedFile) || null;
+  const getLastAnalysis = () => (typeof LGMDM !== 'undefined' && LGMDM.state?.lastAnalysisData) || null;
 
   const STORAGE_KEY_DEMASK = 'lg_premium_demask_settings';
 
@@ -86,6 +87,13 @@
   function ensureAudioTap() {
     if (_audioTap.ready) return _audioTap;
 
+    // Evitar instanciar AudioContext si todavía no hay elementos de audio montados
+    const mixerMaster = LGMDM?.mixerEngine?.previewEngine?.masterGain;
+    const audioEl = document.querySelector('#previewAudioWrap audio[data-preview-ready="true"]')
+                  || document.querySelector('#previewAudioWrap audio')
+                  || document.querySelector('#mxrServerPreviewAudio');
+    if (!mixerMaster && !audioEl) return null;
+
     const ctx = (typeof LGMDM !== 'undefined' && LGMDM.audio && typeof LGMDM.audio.getContext === 'function')
       ? LGMDM.audio.getContext()
       : null;
@@ -96,15 +104,11 @@
     let masterOut = null;
 
     // 1) Mixer engine (camino preferido — el master ya está ruteado a destination)
-    const mixerMaster = LGMDM?.mixerEngine?.previewEngine?.masterGain;
     if (mixerMaster && mixerMaster.context === ctx && mixerMaster.context.state !== 'closed') {
       source = mixerMaster;
       sourceType = 'mixer';
     } else {
       // 2) Preview estándar <audio> — requiere re-ruteo vía Web Audio
-      const audioEl = document.querySelector('#previewAudioWrap audio[data-preview-ready="true"]')
-                    || document.querySelector('#previewAudioWrap audio')
-                    || document.querySelector('#mxrServerPreviewAudio');
       if (!audioEl) return null;
 
       try {
@@ -184,27 +188,6 @@
     });
     state.audio.tap = _audioTap;
     return _audioTap;
-  }
-
-  function teardownAudioTap() {
-    if (!_audioTap.ready) return;
-    const safe = (node) => { try { node && node.disconnect && node.disconnect(); } catch (_) {} };
-    safe(_audioTap.splitter);
-    safe(_audioTap.analyserGonioL);
-    safe(_audioTap.analyserGonioR);
-    safe(_audioTap.analyserWaterfall);
-    safe(_audioTap.analyserAurora);
-    (_audioTap.bandAnalysers || []).forEach((pair) => pair.forEach(safe));
-    (_audioTap.bandFilters   || []).forEach((pair) => pair.forEach(safe));
-    safe(_audioTap.source);
-    safe(_audioTap.masterOut);
-    Object.assign(_audioTap, {
-      ctx: null, source: null, splitter: null, masterOut: null,
-      sourceType: null, sourceEl: null,
-      analyserGonioL: null, analyserGonioR: null, analyserWaterfall: null, analyserAurora: null,
-      bandAnalysers: [], bandFilters: [], ready: false
-    });
-    state.audio.tap = null;
   }
 
   // Correlación Pearson sobre vectores de [-1..1]. Barata: O(n) con n ≤ 512.
@@ -469,6 +452,7 @@
           <button class="pro-tab-btn" data-premium-tab="phase-rotation">🔄 20. Phase Rotation</button>
           <button class="pro-tab-btn" data-premium-tab="reverb">🌫 21. Reverb</button>
           <button class="pro-tab-btn" data-premium-tab="loudness-war">📉 22. Loudness War</button>
+          <button class="pro-tab-btn" data-premium-tab="iso-compensation">🔉 23. ISO 226 Compensation</button>
         </div>
 
         <!-- Cuerpo dinámico de la pestaña activa -->
@@ -498,10 +482,13 @@
         modal.classList.add('pro-tab-leaving');
         requestAnimationFrame(() => {
           renderActiveTab();
-          requestAnimationFrame(() => modal.classList.remove('pro-tab-leaving'));
+          requestAnimationFrame(() => {
+            modal.classList.remove('pro-tab-leaving');
+            // F5.1/F5.2 — Inicializar widget del nuevo tab DESPUÉS de render
+            // (antes el canvas aún no existía → setupProFeatures salía con null).
+            setupProFeatures(state.activeTab);
+          });
         });
-        // F5.1/F5.2 — Inicializar widget del nuevo tab si corresponde.
-        setupProFeatures(state.activeTab);
       });
     });
   }
@@ -538,12 +525,6 @@
     }
     // F5.2 — Liberar widgets Pro (rAF + listeners DOM) al cerrar modal.
     teardownProFeatures();
-    teardownAudioTap();
-    // F5.8 — Liberar IntersectionObserver de Aurora al cerrar para evitar leak.
-    if (LG.auroraIO) {
-      LG.auroraIO.disconnect();
-      LG.auroraIO = null;
-    }
   }
 
   // ── RENDERIZADO SEGÚN PESTAÑA ───────────────────────────────────────
@@ -551,7 +532,7 @@
     const container = el('premiumTabContent');
     if (!container) return;
 
-    const analysis = window.lastAnalysisData || LG.state?.lastAnalysisData || LG.state?.analysis || window.analysisData || null;
+    const analysis = getLastAnalysis() || LG.state?.analysis || window.analysisData || null;
     const isLive = Boolean(analysis && (
       Number.isFinite(Number(analysis.lufs)) ||
       Number.isFinite(Number(analysis.integrated_lufs)) ||
@@ -635,6 +616,10 @@
         break;
       case 'loudness-war':
         renderLoudnessWarTab(container);
+        break;
+      case 'iso-compensation':
+        // FIX P0 — Tab 24: ISO 226 Compensation (antes inalcanzable).
+        renderIsoCompensationTab(container);
         break;
       default:
         state.activeTab = 'compliance';
@@ -768,11 +753,14 @@
 
   // ── Compliance: refrescar análisis vía POST /analysis ─────────────────
   async function runComplianceRefresh(container) {
-    const file = (typeof window !== 'undefined' && window.selectedFile) || null;
+    const file = getSelectedFile();
     if (!file) {
       LGMDM.ui?.showToast?.('Cargá un archivo antes de re-analizar.', 'warning', 4000);
       return;
     }
+    // Guard contra cambio de tab: si el usuario navega a otro tab durante
+    // el await del backend, abortamos para no mutar un DOM detached.
+    const startedTab = state.activeTab;
     const btn = el('btnRefreshCompliance');
     const status = el('certNotice');
     try {
@@ -781,6 +769,7 @@
       const fd = new FormData();
       fd.append('file', file);
       const res = await apiPostDsp('/analysis', fd);
+      if (state.activeTab !== startedTab) return;
       const data = await res.json();
       const lufs = Number(data?.integrated_lufs ?? data?.lufs);
       const tp = Number(data?.true_peak_dbtp ?? data?.true_peak_db);
@@ -789,8 +778,8 @@
         throw new Error('Respuesta del backend sin métricas utilizables.');
       }
       // Publicar globalmente para que otros módulos se enteren
-      window.lastAnalysisData = data;
       if (LG.state) LG.state.lastAnalysisData = data;
+      else if (window.LGMDM?.state) window.LGMDM.state.lastAnalysisData = data;
       window.dispatchEvent(new CustomEvent('analysis-updated', { detail: data }));
       const safeLra = Number.isFinite(lra) ? lra : 6.5;
       renderComplianceTab(container, { lufs, tp, lra: safeLra, isLive: true });
@@ -846,7 +835,7 @@
 
   function _currentMetrics() {
     // Helper para refrescar el tab con las métricas actuales del state global.
-    const analysis = window.lastAnalysisData || LG.state?.lastAnalysisData || null;
+    const analysis = getLastAnalysis();
     const lufs = Number(analysis?.integrated_lufs ?? analysis?.lufs ?? -14.2);
     const tp = Number(analysis?.true_peak_dbtp ?? analysis?.true_peak_db ?? analysis?.peak_db ?? -0.8);
     const lra = Number(analysis?.lra ?? analysis?.loudness_range_lra ?? 6.5);
@@ -854,7 +843,7 @@
   }
 
   function exportQualityCertificate(metrics) {
-    const filename = window.selectedFile?.name || 'Master_Track';
+    const filename = getSelectedFile()?.name || 'Master_Track';
     const dateStr = new Date().toLocaleString();
     const certData = {
       title: 'CERTIFICADO TÉCNICO DE MASTERIZACIÓN',
@@ -945,7 +934,7 @@
         const isPlaying = (current === slot);
         btn.classList.toggle('active', isPlaying);
         if (isPlaying) {
-          btn.style.outline = '2px solid var(--accent, #52f2bd)';
+          btn.style.outline = '2px solid var(--ui-accent, #52f2bd)';
           btn.style.boxShadow = '0 0 14px rgba(82, 242, 189, 0.45)';
           btn.textContent = `🔊 ${label} (Activo)`;
         } else {
@@ -1443,7 +1432,7 @@
           <div>
             <strong class="pro-card-title">📁 Archivo de Audio</strong>
             <p class="pro-caption-muted">
-              Pista actual: <span id="codecCurrentFile" class="pro-current-file">${window.selectedFile ? window.selectedFile.name : 'Ningún archivo cargado en consola'}</span>
+              Pista actual: <span id="codecCurrentFile" class="pro-current-file">${getSelectedFile() ? getSelectedFile().name : 'Ningún archivo cargado en consola'}</span>
             </p>
           </div>
           <button class="pro-primary" id="btnRunCodec" style="padding: 8px 18px;">⚡ Procesar Códec</button>
@@ -2003,7 +1992,8 @@
   function getActiveOrPickedFile(pickerId) {
     const picker = el(pickerId);
     if (picker && picker.files && picker.files[0]) return picker.files[0];
-    if (window.selectedFile) return window.selectedFile;
+    const sel = getSelectedFile();
+    if (sel) return sel;
     return null;
   }
 
@@ -2052,7 +2042,9 @@
   // renderTamerTab — Tab 8: Resonance Tamer (Soothe-style) — backend DSP
   // ================================================================
   function renderTamerTab(container) {
-    const currentName = window.selectedFile ? window.selectedFile.name : 'Ningún archivo cargado en consola';
+    const currentFile = getSelectedFile();
+    const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
+    const currentName = currentFile ? esc(currentFile.name) : 'Ningún archivo cargado en consola';
     container.innerHTML = `
       <div>
         <h4 class="pro-h4-accent">🎯 Supresor Espectral de Resonancias (Soothe-Style Tamer)</h4>
@@ -2167,7 +2159,9 @@
   // renderWarmerTab — Tab 9: Vintage Warmer (Polynomial Inflator) — backend DSP
   // ================================================================
   function renderWarmerTab(container) {
-    const currentName = window.selectedFile ? window.selectedFile.name : 'Ningún archivo cargado en consola';
+    const currentFile = getSelectedFile();
+    const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
+    const currentName = currentFile ? esc(currentFile.name) : 'Ningún archivo cargado en consola';
     container.innerHTML = `
       <div>
         <h4 class="pro-h4-accent">🔥 Saturador Armónico Analógico (Polynomial Inflator & Warmer)</h4>
@@ -2338,6 +2332,32 @@
       const o = el('matchAmountVal'); if (o) o.textContent = `${e.target.value}%`;
     });
 
+    // ── MX-08 — fetchMatch pre-flight al seleccionar reference ──────────
+    // Cuando el usuario elige una pista de referencia, calculamos match
+    // bands sin esperar al botón Apply y refrescamos la visualización del
+    // Tab 17 (reference-match) si está instanciado. Backward-compat: si
+    // `Widget.fetchMatch` no existe o falla, el flujo principal sigue OK.
+    el('matchRefFile')?.addEventListener('change', () => {
+      const tgtFile = getActiveOrPickedFile('matchTargetFile');
+      const refPicker = el('matchRefFile');
+      const refFile = refPicker && refPicker.files && refPicker.files[0] ? refPicker.files[0] : null;
+      if (!tgtFile || !refFile) return;
+      const RefWidgetCls = window.LGMDM?.proFeatures?.referenceMatchWidget;
+      if (typeof RefWidgetCls?.fetchMatch !== 'function') return;
+      const matchAmt = Number(el('matchAmount')?.value || 65) / 100;
+      RefWidgetCls.fetchMatch(tgtFile, refFile, { match_amount: matchAmt })
+        .then((result) => {
+          if (!result || !Array.isArray(result.applied_eq_bands)) return;
+          const vizInst = _proInstances.get('reference-match');
+          if (vizInst && typeof vizInst.update === 'function') {
+            vizInst.update({ applied_eq_bands: result.applied_eq_bands });
+          }
+        })
+        .catch((err) => {
+          if (typeof console !== 'undefined') console.debug('[reference-match fetchMatch]', err);
+        });
+    });
+
     el('btnRunMatchEq')?.addEventListener('click', async () => {
       const tgtFile = getActiveOrPickedFile('matchTargetFile');
       const refPicker = el('matchRefFile');
@@ -2387,7 +2407,9 @@
   // renderPhantomSubTab — Tab 11: Phantom Sub Bass — psychoacoustic harmonics
   // ================================================================
   function renderPhantomSubTab(container) {
-    const currentName = window.selectedFile ? window.selectedFile.name : 'Ningún archivo cargado en consola';
+    const currentFile = getSelectedFile();
+    const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
+    const currentName = currentFile ? esc(currentFile.name) : 'Ningún archivo cargado en consola';
     container.innerHTML = `
       <div>
         <h4 class="pro-h4-accent">🔊 Generador Psicoacústico de Graves (Phantom Sub Bass)</h4>
@@ -2502,7 +2524,9 @@
   // renderStemSepTab — Tab 12: AI Stem Separator (Demucs) — async job polling
   // ================================================================
   function renderStemSepTab(container) {
-    const currentName = window.selectedFile ? window.selectedFile.name : 'Ningún archivo cargado en consola';
+    const currentFile = getSelectedFile();
+    const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
+    const currentName = currentFile ? esc(currentFile.name) : 'Ningún archivo cargado en consola';
     container.innerHTML = `
       <div>
         <h4 class="pro-h4-accent">🪄 Separador de Stems por IA (Demucs AI Studio)</h4>
@@ -2645,14 +2669,20 @@
   const PRO_FEATURES = {
     'loudness-penalty':    { cls: 'loudnessPenaltyWidget',    endpoint: '/dsp/loudness-penalty' },
     'spectral-tilt':       { cls: 'spectralTiltWidget',       endpoint: '/dsp/spectral-tilt' },
-    'multiband-transient': { cls: 'MultibandTransientWidget', endpoint: null },
+    'multiband-transient': { cls: 'multibandTransientWidget', endpoint: null },
     'ms-imager':           { cls: 'msImagerWidget',           endpoint: null },
-    'reference-match':     { cls: 'referenceMatchWidget',     endpoint: null },
-    'dr-meter':            { cls: 'DrMeterWidget',            endpoint: '/dsp/dr-meter' },
-    'saturation':          { cls: 'saturationWidget',         endpoint: null },
+    'reference-match':     { cls: 'referenceMatchWidget',     endpoint: '/dsp/match-eq' },
+    'dr-meter':            { cls: 'drMeterWidget',            endpoint: '/dsp/dr-meter' },
+    'saturation':          { cls: 'saturationWidget',         endpoint: '/dsp/inflator' },
     'phase-rotation':      { cls: 'phaseRotationWidget',      endpoint: '/dsp/phase-rotation' },
-    'reverb':              { cls: 'ReverbWidget',             endpoint: null },
-    'loudness-war':        { cls: 'LoudnessWarWidget',        endpoint: null }
+    'reverb':              { cls: 'reverbWidget',             endpoint: null },
+    'loudness-war':        { cls: 'loudnessWarWidget',        endpoint: null },
+    // FIX P0 — Tab antes inalcanzable:
+    'iso-compensation':    { cls: 'isoCompensationWidget',    endpoint: '/dsp/iso-compensation' },
+    // FIX MX-05 — tabs nuevas registradas (insert-style; ver nota en reporte):
+    'resonance-tamer':     { cls: 'resonanceTamerWidget',     endpoint: '/dsp/resonance-tamer' },
+    'phantom-sub':         { cls: 'phantomSubWidget',         endpoint: '/dsp/phantom-sub' },
+    'cross-demask':        { cls: 'crossDemaskWidget',        endpoint: '/dsp/cross-demask' }
   };
 
   // Instancias activas (una por tab) — la clave es el tabId.
@@ -2665,7 +2695,34 @@
   }
 
   // F5.2 — Cleanup de todos los rAF / listeners / DOM de widgets Pro.
+  function teardownAudioTap() {
+    if (!_audioTap || !_audioTap.ready) return;
+    const safe = (node) => { try { node && node.disconnect && node.disconnect(); } catch (_) {} };
+    safe(_audioTap.splitter);
+    safe(_audioTap.analyserGonioL);
+    safe(_audioTap.analyserGonioR);
+    safe(_audioTap.analyserWaterfall);
+    safe(_audioTap.analyserAurora);
+    (_audioTap.bandAnalysers || []).forEach((pair) => pair.forEach(safe));
+    (_audioTap.bandFilters || []).forEach((pair) => pair.forEach(safe));
+    if (_audioTap.sourceType === 'media-element') {
+      safe(_audioTap.masterOut);
+    }
+    Object.assign(_audioTap, {
+      ready: false,
+      splitter: null,
+      masterOut: null,
+      analyserGonioL: null,
+      analyserGonioR: null,
+      analyserWaterfall: null,
+      analyserAurora: null,
+      bandAnalysers: [],
+      bandFilters: []
+    });
+  }
+
   function teardownProFeatures() {
+    teardownAudioTap();
     _proInstances.forEach((inst) => {
       if (!inst) return;
       try {
@@ -2712,14 +2769,105 @@
     if (_proInstances.has(tabId)) return;
 
     const canvas = el(`${tabId}Canvas`);
-    if (!canvas) return;
+    if (!canvas) {
+      // MX-14 — Safety net: si el canvas aún no está en el DOM, observar el
+      // contenedor del modal y reintentar cuando se inyecte (protege contra
+      // race conditions entre renderActiveTab() y esta función).
+      _observeCanvasInsertion(tabId);
+      return;
+    }
     try {
       const inst = new Cls();
       inst.init(canvas, {});
       _proInstances.set(tabId, inst);
+
+      // ── MX-06 — phase-rotation: invocar processAllBands al instanciar ──
+      // Helper huérfano que recorre cada banda y llama /dsp/phase-rotation
+      // por separado. Solo se dispara si hay un audio cargado en la consola
+      // y el widget expone processAllBands en su clase.
+      if (tabId === 'phase-rotation' && typeof Cls.processAllBands === 'function') {
+        const file = getSelectedFile();
+        if (file && inst.data && Array.isArray(inst.data.bands) && inst.data.bands.length > 0) {
+          Cls.processAllBands(file, inst.data.bands.slice(), '')
+            .then((results) => {
+              if (!Array.isArray(results)) return;
+              const okBands = results
+                .filter((r) => r && r.ok)
+                .map((r) => ({ name: r.name, freq_hz: r.freq_hz, angle_deg: r.angle_deg, q: r.q }));
+              if (okBands.length && typeof inst.update === 'function') {
+                inst.update({ bands: okBands });
+              }
+            })
+            .catch((err) => {
+              if (typeof console !== 'undefined') console.debug('[phase-rotation processAllBands]', err);
+            });
+        }
+      }
     } catch (err) {
       if (typeof console !== 'undefined') console.error(`[proFeatures] init(${tabId}) falló:`, err);
     }
+  }
+
+  // ── MX-14 — Lifecycle helper ──────────────────────────────────────────
+  // Si el canvas aún no está en el DOM cuando setupProFeatures() corre,
+  // observamos #premiumTabContent vía MutationObserver y reintentamos cuando
+  // se inserta el nodo. Sin esta red de seguridad, abrir un tab antes de que
+  // renderActiveTab() inyecte el canvas dejaba el widget huérfano para
+  // siempre (silent return).
+  //
+  // Cancelación: si la observación supera `_PRO_CANVAS_TIMEOUT_MS` sin éxito,
+  // el observer se desconecta y se emite un warning (NO spamea: solo una vez
+  // por tabId pendiente). Cambiar de tab cancela observadores previos.
+  const _PRO_CANVAS_TIMEOUT_MS = 1000;
+  const _proPendingCanvas = new Map();
+
+  function _cancelPendingCanvas(tabId) {
+    const entry = _proPendingCanvas.get(tabId);
+    if (!entry) return;
+    try { entry.observer && entry.observer.disconnect(); } catch (_) {}
+    try { clearTimeout(entry.timeoutId); } catch (_) {}
+    _proPendingCanvas.delete(tabId);
+  }
+
+  function _observeCanvasInsertion(tabId, maxMs) {
+    const timeoutMs = Number.isFinite(maxMs) ? maxMs : _PRO_CANVAS_TIMEOUT_MS;
+
+    // Cancelar cualquier observador pendiente de OTRO tab (solo un tab está
+    // activo a la vez; un observer zombi consumiría CPU hasta su timeout).
+    _proPendingCanvas.forEach((entry, pendingTabId) => {
+      if (pendingTabId !== tabId) _cancelPendingCanvas(pendingTabId);
+    });
+
+    // Re-check inmediato por race entre la lookup original y esta función.
+    if (el(`${tabId}Canvas`)) {
+      setupProFeatures(tabId);
+      return;
+    }
+
+    const content = el('premiumTabContent');
+    if (!content) {
+      if (typeof console !== 'undefined') {
+        console.warn(`[proFeatures] ${tabId}: contenedor #premiumTabContent ausente; no se puede esperar el canvas.`);
+      }
+      return;
+    }
+
+    const entry = { observer: null, timeoutId: null };
+    entry.observer = new MutationObserver(() => {
+      if (!_proPendingCanvas.has(tabId)) return; // ya cancelado
+      if (el(`${tabId}Canvas`)) {
+        _cancelPendingCanvas(tabId);
+        setupProFeatures(tabId);
+      }
+    });
+    entry.observer.observe(content, { childList: true, subtree: true });
+    entry.timeoutId = setTimeout(() => {
+      _cancelPendingCanvas(tabId);
+      if (!_proInstances.has(tabId) && typeof console !== 'undefined') {
+        console.warn(`[proFeatures] ${tabId}: canvas "${tabId}Canvas" no apareció tras ${timeoutMs}ms.`);
+      }
+    }, timeoutMs);
+    _proPendingCanvas.set(tabId, entry);
   }
 
   // Helper compartido: construye el patrón "canvas + controls" de cada panel.
@@ -2734,7 +2882,7 @@
           <div class="pro-meter-card">
             <strong class="pro-card-title">📁 Archivo de Audio</strong>
             <p class="pro-caption-muted">
-              Pista actual: <span class="pro-current-file">${window.selectedFile ? window.selectedFile.name : 'Ningún archivo cargado en consola'}</span>
+              Pista actual: <span class="pro-current-file">${getSelectedFile() ? getSelectedFile().name : 'Ningún archivo cargado en consola'}</span>
             </p>
             <div class="pro-section-gap-tight">
               <label class="pro-label-muted">O seleccionar archivo alternativo:</label>
@@ -2807,7 +2955,7 @@
         const penalty = Number(json.penalty_db);
         const orig = Number(json.orig_lufs);
         const post = Number(json.post_lufs);
-        const analysis = window.lastAnalysisData || LG.state?.lastAnalysisData || {};
+        const analysis = getLastAnalysis() || {};
         const baselineOrig = Number.isFinite(orig)
           ? orig
           : Number(analysis.integrated_lufs ?? analysis.lufs ?? -14);
@@ -3096,6 +3244,73 @@
     );
   }
 
+  // ── Tab 23: ISO 226 Compensation (FIX P0 — antes inalcanzable) ──────
+  function renderIsoCompensationTab(container) {
+    container.innerHTML = _proPanelShell(
+      'iso-compensation',
+      '🔉 ISO 226 — Compensación de Curvas Isosónicas',
+      'Aplica la corrección tonal ISO 226 según el nivel de playback (phon) para que la mezcla se perciba uniforme en distintos volúmenes.',
+      `
+        <div class="pro-mt-14">
+          <div class="pro-control-row">
+            <label>Playback level:</label>
+            <select id="isoPlaybackPhon" class="pro-select-dark">
+              <option value="40">40 phon (silencio)</option>
+              <option value="60" selected>60 phon (oficina)</option>
+              <option value="80">80 phon (referencia)</option>
+              <option value="100">100 phon (fuerte)</option>
+            </select>
+          </div>
+          <div class="pro-control-row">
+            <label>Reference level:</label>
+            <select id="isoReferencePhon" class="pro-select-dark">
+              <option value="40">40 phon</option>
+              <option value="60">60 phon</option>
+              <option value="80" selected>80 phon (mix)</option>
+              <option value="100">100 phon</option>
+            </select>
+          </div>
+          <div class="pro-control-row">
+            <label>Strength:</label>
+            <input type="range" min="0" max="100" value="50" id="isoStrength">
+            <output id="isoStrengthVal">50%</output>
+          </div>
+        </div>
+        <div class="pro-section-gap-tight">
+          <button class="pro-action-btn-center" id="isoRunBtn">🎚 Aplicar compensación</button>
+        </div>
+      `
+    );
+    // wire básico del slider
+    const strength = el('isoStrength');
+    const strengthVal = el('isoStrengthVal');
+    if (strength && strengthVal) {
+      strength.addEventListener('input', () => { strengthVal.textContent = `${strength.value}%`; });
+    }
+    const runBtn = el('isoRunBtn');
+    if (runBtn) {
+      runBtn.addEventListener('click', async () => {
+        runBtn.disabled = true;
+        runBtn.textContent = '⏳ Procesando…';
+        try {
+          const fd = new FormData();
+          const f = getSelectedFile();
+          if (f) fd.append('file', f, f.name);
+          fd.append('playback_phon', el('isoPlaybackPhon')?.value || '60');
+          fd.append('reference_phon', el('isoReferencePhon')?.value || '80');
+          fd.append('strength', (Number(el('isoStrength')?.value || 50) / 100).toFixed(3));
+          await _fetchDspJson('/dsp/iso-compensation', fd);
+          if (typeof LGMDM.ui.showToast === 'function') LGMDM.ui.showToast('✅ ISO 226 aplicado', 'success');
+        } catch (err) {
+          if (typeof LGMDM.ui.showToast === 'function') LGMDM.ui.showToast(`❌ ${err.message}`, 'error');
+        } finally {
+          runBtn.disabled = false;
+          runBtn.textContent = '🎚 Aplicar compensación';
+        }
+      });
+    }
+  }
+
   // ==================== A/B COMPARE HELPER ====================
   // Helper compartido para los módulos que exponen comparación antes/después
   // (Codec, Tamer, Warmer, MatchEq, PhantomSub y placeholder de Compliance).
@@ -3198,9 +3413,9 @@
         btn.id = 'btnOpenPremiumSuite';
         btn.type = 'button';
         btn.className = 'header-btn';
-        btn.style.cssText = 'width: auto; padding: 0 10px; font-weight: 800; font-size: 10px; color: var(--accent, #52f2bd); display: flex; align-items: center; gap: 5px; cursor: pointer;';
+        btn.style.cssText = 'width: auto; padding: 0 10px; font-weight: 800; font-size: 10px; color: var(--ui-accent, #52f2bd); display: flex; align-items: center; gap: 5px; cursor: pointer;';
         btn.innerHTML = '<span>💎</span><span>PRO</span>';
-        btn.title = 'Suite de Funciones Premium (7 herramientas avanzadas)';
+        btn.title = 'Suite de Funciones Premium (22 herramientas avanzadas)';
         headerRight.prepend(btn);
       }
     }
@@ -3208,8 +3423,6 @@
       btn.dataset.premiumWired = 'true';
       btn.addEventListener('click', () => open());
     }
-
-    initAuroraSpectrum();
   }
 
   LG.premium = {
@@ -3287,155 +3500,10 @@ const _SPECTRUM_GRADIENT_LUT = (() => {
   return c;
 })();
 
-const _SPECTRUM_BANDS = 48;
-
-function _auroraLogBins(analyser, bands) {
-  const binCount = analyser.frequencyBinCount;
-  const sampleRate = analyser.context.sampleRate;
-  const nyquist = sampleRate / 2;
-  const minFreq = 30, maxFreq = 16000;
-  const ratio = Math.log(maxFreq / minFreq);
-  const data = new Uint8Array(binCount);
-  analyser.getByteFrequencyData(data);
-  const out = new Float32Array(bands);
-  for (let i = 0; i < bands; i++) {
-    const f0 = minFreq * Math.exp((i / bands) * ratio);
-    const f1 = minFreq * Math.exp(((i + 1) / bands) * ratio);
-    const bin0 = Math.max(0, Math.floor(f0 / nyquist * binCount));
-    const bin1 = Math.min(binCount, Math.ceil(f1 / nyquist * binCount));
-    let sum = 0, n = 0;
-    for (let b = bin0; b < bin1; b++) { sum += data[b]; n++; }
-    out[i] = n > 0 ? sum / n / 255 : 0;
-  }
-  return out;
-}
-
-let _auroraPeaks = new Float32Array(_SPECTRUM_BANDS);
-let _auroraLastFrame = 0;
-let _auroraRafId = 0;
-const _AURORA_FRAME_INTERVAL = 1000 / 60;
-
-function renderAuroraSpectrum(canvas, analyser) {
-  if (_auroraRafId) { cancelAnimationFrame(_auroraRafId); _auroraRafId = 0; }
-  if (!state.audio.tap) return;
-  if (!canvas || !analyser) return;
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    cancelAnimationFrame(_auroraRafId);
-    _auroraRafId = 0;
-    return; // skip animation (P0 accessibility)
-  }
-  const now = performance.now();
-  if (now - _auroraLastFrame < _AURORA_FRAME_INTERVAL) {
-    _auroraRafId = requestAnimationFrame(() => renderAuroraSpectrum(canvas, analyser));
-    return;
-  }
-  _auroraLastFrame = now;
-
-  const ctx = canvas.getContext('2d');
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const cssW = canvas.clientWidth, cssH = canvas.clientHeight;
-  if (canvas.width !== Math.floor(cssW * dpr) || canvas.height !== Math.floor(cssH * dpr)) {
-    canvas.width = Math.max(1, Math.floor(cssW * dpr));
-    canvas.height = Math.max(1, Math.floor(cssH * dpr));
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
-  }
-  const w = cssW, h = cssH;
-
-  ctx.clearRect(0, 0, w, h);
-
-  const bands = _auroraLogBins(analyser, _SPECTRUM_BANDS);
-  const barW = w / _SPECTRUM_BANDS;
-  const dt = 1 / 60;
-
-  for (let i = 0; i < _SPECTRUM_BANDS; i++) {
-    const v = bands[i];
-    const x = i * barW;
-    const barH = v * h * 0.95;
-
-    if (v > _auroraPeaks[i]) _auroraPeaks[i] = v;
-    else _auroraPeaks[i] = Math.max(0, _auroraPeaks[i] - dt * 0.7);
-
-    ctx.shadowBlur = 4;
-    ctx.shadowColor = 'rgba(66, 232, 255, 0.6)';
-
-    const colorX = Math.max(0, Math.min(255, Math.floor(v * 255)));
-    ctx.drawImage(_SPECTRUM_GRADIENT_LUT, colorX, 0, 1, 1, x, h - barH, barW * 0.85, barH);
-
-    if (_auroraPeaks[i] > 0.01) {
-      const peakY = h - _auroraPeaks[i] * h * 0.95;
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(247, 248, 255, 0.7)';
-      ctx.fillRect(x, peakY - 2, barW * 0.85, 2);
-    }
-  }
-  ctx.shadowBlur = 0;
-
-  _auroraRafId = requestAnimationFrame(() => renderAuroraSpectrum(canvas, analyser));
-}
-
-function initAuroraSpectrum() {
-  if (document.getElementById('auroraSpectrum')) return;
-  const wrap = document.createElement('div');
-  wrap.className = 'aurora-spectrum';
-  wrap.id = 'auroraSpectrum';
-  const label = document.createElement('div');
-  label.className = 'aurora-spectrum-label';
-  label.textContent = 'Aurora Spectrum';
-  const canvas = document.createElement('canvas');
-  canvas.className = 'aurora-spectrum-canvas';
-  canvas.id = 'auroraSpectrumCanvas';
-  wrap.appendChild(label);
-  wrap.appendChild(canvas);
-  document.body.appendChild(wrap);
-
-  let _auroraStartAttempts = 0;
-  const startWhenReady = () => {
-    const tap = ensureAudioTap();
-    if (tap && tap.analyserAurora) {
-      renderAuroraSpectrum(canvas, tap.analyserAurora);
-      _auroraStartAttempts = 0;
-    } else {
-      _auroraStartAttempts++;
-      if (_auroraStartAttempts >= 20) {
-        console.warn("Aurora: audio tap no disponible, rendirse");
-        return;
-      }
-      setTimeout(startWhenReady, 150 * Math.min(_auroraStartAttempts, 4));
-    }
-  };
-  startWhenReady();
-
-  // F5.8 — Pause rAF cuando la barra no está visible para ahorrar CPU/GPU.
-  if (typeof IntersectionObserver !== 'undefined') {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          if (!_auroraRafId && state.audio.tap && state.audio.tap.analyserAurora) {
-            renderAuroraSpectrum(canvas, state.audio.tap.analyserAurora);
-          }
-        } else if (_auroraRafId) {
-          cancelAnimationFrame(_auroraRafId);
-          _auroraRafId = 0;
-        }
-      });
-    }, { threshold: 0 });
-    io.observe(wrap);
-    LG.auroraIO = io;
-  }
-}
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init, { once: true });
   } else {
     init();
   }
-
-  // F5.8 — Liberar IntersectionObserver de Aurora antes de cerrar la pestaña.
-  global.addEventListener('beforeunload', () => {
-    if (LG.auroraIO) {
-      LG.auroraIO.disconnect();
-      LG.auroraIO = null;
-    }
-  }, { once: true });
 })(window);

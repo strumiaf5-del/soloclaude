@@ -38,7 +38,6 @@
     { name: 'high',     freq_hz: 10000, angle_deg: 0,   q: 1.0 }
   ];
 
-  function logFreq(f) { return Math.log10(Math.max(1, f)); }
   const LOG_FMIN = logFreq(FMIN);
   const LOG_FMAX = logFreq(FMAX);
   function xFromAngle(deg, left, width) {
@@ -422,6 +421,51 @@
     }
   }
 
+  // ── Orquestador: backend procesa 1 banda por request; widget modela 4 ──
+  Widget.processAllBands = async function (file, bands, token) {
+    if (!Array.isArray(bands)) bands = (Widget.prototype.constructor.prototype.data && Widget.prototype.constructor.prototype.data.bands) || [];
+    const results = [];
+    for (const b of bands) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('freq_hz', String(b.freq_hz));
+      fd.append('angle_deg', String(b.angle_deg));
+      fd.append('q', String(b.q));
+      try {
+        const res = await fetch('/dsp/phase-rotation', {
+          method: 'POST',
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          body: fd
+        });
+        const blob = await res.blob();
+        results.push({ ...b, ok: true, blob });
+      } catch (_) {
+        results.push({ ...b, ok: false });
+      }
+    }
+    return results;
+  };
+
   NS.proFeatures.phaseRotationWidget = Widget;
   if (typeof module !== 'undefined' && module.exports) module.exports = { Widget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Backward-compat: si NS.create falla, la clase sigue funcionando standalone
+  // y `Widget.processAllBands(file, bands, token)` permanece accesible.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['phase-rotation']) {
+      const inst = rack.create({
+        id: 'phase-rotation', title: '🔄 Phase Rotation', endpoint: '/dsp/phase-rotation', widget: Widget
+      });
+      if (inst) {
+        Widget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['phase-rotation'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'phase-rotation', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

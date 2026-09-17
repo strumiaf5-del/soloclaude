@@ -24,12 +24,6 @@
     'Loudness War Victim':     { label: 'Loudness War Victim',     tone: '#ff5f72', bg: 'rgba(255,95,114,.18)' }
   };
 
-  function clamp(n, lo, hi) {
-    n = Number(n);
-    if (!Number.isFinite(n)) return lo;
-    return Math.max(lo, Math.min(hi, n));
-  }
-
   function drToY(dr, h, padTop, padBot) {
     const usable = h - padTop - padBot;
     const t = (clamp(dr, DR_MIN, DR_MAX) - DR_MIN) / (DR_MAX - DR_MIN);
@@ -49,7 +43,7 @@
     return 'Loudness War Victim';
   }
 
-  class LoudnessWarWidget {
+  class loudnessWarWidget {
     constructor() {
       this.canvas = null;
       this.root = null;
@@ -82,7 +76,7 @@
           <strong class="pro-card-title" style="font-size:.78rem;">
             ⚔ Loudness War Detector Timeline
           </strong>
-          <span style="font-size:.62rem;color:var(--muted,#9ba6c4);">
+          <span style="font-size:.62rem;color:var(--ui-muted,#9ba6c4);">
             DR score por sección de 3 segundos
           </span>
         </div>
@@ -94,7 +88,7 @@
                            border-radius:12px;background:#070912;
                            border:1px solid rgba(255,255,255,.06);"></canvas>
             <div style="display:flex;gap:.7rem;justify-content:space-between;margin-top:.5rem;
-                        font-size:.62rem;color:var(--muted,#9ba6c4);">
+                        font-size:.62rem;color:var(--ui-muted,#9ba6c4);">
               <span>🟢 DR &gt; 10 · Dynamic Friendly</span>
               <span>🟡 DR 6–10 · Balanced</span>
               <span>🔴 DR &lt; 6 · Loudness War</span>
@@ -106,7 +100,7 @@
                  style="padding:.7rem;border-radius:12px;background:rgba(255,255,255,.025);
                         border:1px solid rgba(255,255,255,.06);">
               <span style="font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;
-                           color:var(--muted,#9ba6c4);">
+                           color:var(--ui-muted,#9ba6c4);">
                 Verdict
               </span>
               <div id="lwBadge"
@@ -125,7 +119,7 @@
                  style="padding:.7rem;border-radius:12px;background:rgba(255,255,255,.025);
                         border:1px solid rgba(255,255,255,.06);">
               <span style="font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;
-                           color:var(--muted,#9ba6c4);">
+                           color:var(--ui-muted,#9ba6c4);">
                 Análisis
               </span>
               <div id="lwExplain"
@@ -137,7 +131,7 @@
                  style="padding:.7rem;border-radius:12px;background:rgba(255,255,255,.025);
                         border:1px solid rgba(255,255,255,.06);">
               <span style="font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;
-                           color:var(--muted,#9ba6c4);">
+                           color:var(--ui-muted,#9ba6c4);">
                 Duración total
               </span>
               <div id="lwDuration"
@@ -213,7 +207,7 @@
     getControls() {
       // Loudness War no expone controles interactivos (es vista de timeline).
       return `
-        <div style="font-size:.72rem;color:var(--muted,#9ba6c4);text-align:center;">
+        <div style="font-size:.72rem;color:var(--ui-muted,#9ba6c4);text-align:center;">
           Visualización de timeline DR — sin controles interactivos.
         </div>
       `;
@@ -473,6 +467,27 @@
     }
   }
 
-  LG.proFeatures.LoudnessWarWidget = LoudnessWarWidget;
-  global.LoudnessWarWidget = LoudnessWarWidget;
+  LG.proFeatures.loudnessWarWidget = loudnessWarWidget;
+  if (typeof module !== 'undefined' && module.exports) module.exports = { loudnessWarWidget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Frontend-only: no tiene /dsp/* endpoint. La entry en CATALOG sólo
+  // permite al rack snapshotear su state (serialize/restore).
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['loudness-war']) {
+      const inst = rack.create({
+        id: 'loudness-war', title: '📉 Loudness War', widget: loudnessWarWidget
+      });
+      if (inst) {
+        loudnessWarWidget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['loudness-war'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'loudness-war', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);
+

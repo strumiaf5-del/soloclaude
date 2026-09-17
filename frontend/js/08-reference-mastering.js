@@ -262,7 +262,7 @@ LGMDM.reference.bandEQ = (function() {
     const gains = curve.map(p => p.gain_db);
     const MAX_G = Math.max(6, ...gains.map(Math.abs));
     ctx.beginPath();
-    ctx.strokeStyle = "var(--accent2, #06b6d4)";
+    ctx.strokeStyle = "var(--ui-accent-2, #06b6d4)";
     ctx.lineWidth = 1.5;
     curve.forEach((p, i) => {
       const x = (i / (curve.length - 1)) * W;
@@ -541,7 +541,7 @@ function startReferencePolling(jobId) {
           _refAbBtn = document.createElement("button");
           _refAbBtn.id = "btnRefAB";
           _refAbBtn.className = "btn";
-          _refAbBtn.style.cssText = "display:block;margin-top:0.4rem;background:var(--surface2,#1a1a2e);border:1px solid var(--accent2);color:var(--accent2);font-size:0.75rem";
+          _refAbBtn.style.cssText = "display:block;margin-top:0.4rem;background:var(--ui-surface-2,#1a1a2e);border:1px solid var(--ui-accent-2);color:var(--ui-accent-2);font-size:0.75rem";
           _refAbBtn.textContent = "⇄ A/B Original vs Master";
           btn.parentElement?.insertBefore(_refAbBtn, btn.nextSibling);
         }
@@ -580,8 +580,8 @@ function startReferencePolling(jobId) {
         renderAnalysisComparison(data.analysis_before, data.analysis_after);
         if (data.analysis_reference?.fft_spectrum && data.analysis_after?.fft_spectrum) {
           renderFFT([
-            { label: "Referencia", data: data.analysis_reference.fft_spectrum, color: "var(--accent2)" },
-            { label: "Resultado", data: data.analysis_after.fft_spectrum, color: "var(--yellow)" },
+            { label: "Referencia", data: data.analysis_reference.fft_spectrum, color: "var(--ui-accent-2)" },
+            { label: "Resultado", data: data.analysis_after.fft_spectrum, color: "var(--ui-warn)" },
           ]);
         }
         if (data.mix_advice_after) renderAdvicePanel(data.mix_advice_after, "Evaluación", "— Resultado");
@@ -651,15 +651,15 @@ function renderReferenceAnalysisPanel(refAnalysis, ownAnalysis, rm) {
     const srcPct = sv !== null ? Math.max(4, ((sv - minRef) / range) * 100) : null;
     const diff = sv !== null ? (rv - sv) : null;
     const diffStr = diff !== null ? (diff >= 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1)) + ' dB' : '';
-    const diffColor = diff === null ? '' : Math.abs(diff) < 2 ? 'var(--green,#3c6)' : Math.abs(diff) < 5 ? 'var(--amber,#fa0)' : 'var(--red,#e05)';
+    const diffColor = diff === null ? '' : Math.abs(diff) < 2 ? 'var(--ui-good,#3c6)' : Math.abs(diff) < 5 ? 'var(--ui-warn,#fa0)' : 'var(--ui-danger,#e05)';
     return `<div class="lgjs-s-5e07f2f4">
       <div class="lgjs-s-9b04fdf1">
         <span><b>${b.label}</b> <span class="lgjs-s-57f9e31d">${b.range}</span></span>
         <span style="color:${diffColor};font-family:var(--mono)">${diffStr}</span>
       </div>
       <div class="lgjs-s-13feb0ac">
-        ${srcPct !== null ? `<div style="position:absolute;left:0;top:0;height:100%;width:${srcPct.toFixed(1)}%;background:var(--accent,#7c3aed);opacity:.45;border-radius:4px"></div>` : ''}
-        <div style="position:absolute;left:0;top:0;height:100%;width:${refPct.toFixed(1)}%;background:var(--accent2,#06b6d4);opacity:.75;border-radius:4px"></div>
+        ${srcPct !== null ? `<div style="position:absolute;left:0;top:0;height:100%;width:${srcPct.toFixed(1)}%;background:var(--ui-accent,#7c3aed);opacity:.45;border-radius:4px"></div>` : ''}
+        <div style="position:absolute;left:0;top:0;height:100%;width:${refPct.toFixed(1)}%;background:var(--ui-accent-2,#06b6d4);opacity:.75;border-radius:4px"></div>
       </div>
     </div>`;
   }).join('');
@@ -674,7 +674,7 @@ function renderReferenceAnalysisPanel(refAnalysis, ownAnalysis, rm) {
   const dynRows = dynMetrics.map(m => {
     if (m.refVal == null) return '';
     const diff = m.ownVal != null ? (m.refVal - m.ownVal) : null;
-    const dc = diff === null ? '' : Math.abs(diff) < 1 ? 'var(--green,#3c6)' : Math.abs(diff) < 3 ? 'var(--amber,#fa0)' : 'var(--red,#e05)';
+    const dc = diff === null ? '' : Math.abs(diff) < 1 ? 'var(--ui-good,#3c6)' : Math.abs(diff) < 3 ? 'var(--ui-warn,#fa0)' : 'var(--ui-danger,#e05)';
     return `<div class="lgjs-s-8f2ca087">
       <span class="lgjs-s-57f9e31d">${m.label}</span>
       <span><span class="lgjs-s-8b7bf11b">${m.ownVal != null ? m.fmt(m.ownVal) + m.unit : '--'}</span>
@@ -699,7 +699,7 @@ function renderReferenceAnalysisPanel(refAnalysis, ownAnalysis, rm) {
   const BAND_LABELS = { sub:'Sub', bass:'Graves', low_mid:'Low-Mid', mid:'Medios', high_mid:'High-Mid', presence:'Presencia', air:'Aire' };
   const bgApplied = Object.entries(bg).filter(([k,v]) => Math.abs(v) >= 0.1);
   const bgHtml = bgApplied.length ? `<div class="lgjs-s-432d224b">Ajustes manuales aplicados: ${
-    bgApplied.map(([k,v]) => `<span style="color:${v>0?'var(--green,#3c6)':'var(--red,#e05)'}"><b>${BAND_LABELS[k]||k}</b> ${v>0?'+':''}${v.toFixed(1)} dB</span>`).join(' · ')
+    bgApplied.map(([k,v]) => `<span style="color:${v>0?'var(--ui-good,#3c6)':'var(--ui-danger,#e05)'}"><b>${BAND_LABELS[k]||k}</b> ${v>0?'+':''}${v.toFixed(1)} dB</span>`).join(' · ')
   }</div>` : '';
 
   const msEqHtml = (rm && rm.eq_curve_mid_db && rm.eq_curve_mid_db.length) ? (() => {
@@ -711,8 +711,8 @@ function renderReferenceAnalysisPanel(refAnalysis, ownAnalysis, rm) {
       ctx.clearRect(0, 0, W, H);
       ctx.strokeStyle = 'rgba(255,255,255,0.08)';
       ctx.beginPath(); ctx.moveTo(0, ZERO); ctx.lineTo(W, ZERO); ctx.stroke();
-      [[rm.eq_curve_mid_db, 'var(--accent2,#06b6d4)'],
-       [rm.eq_curve_side_db, 'var(--accent,#7c3aed)']].forEach(([curve, color]) => {
+      [[rm.eq_curve_mid_db, 'var(--ui-accent-2,#06b6d4)'],
+       [rm.eq_curve_side_db, 'var(--ui-accent,#7c3aed)']].forEach(([curve, color]) => {
         if (!curve || !curve.length) return;
         const gains = curve.map(p => p.gain_db);
         const maxG = Math.max(6, ...gains.map(Math.abs));
@@ -755,6 +755,7 @@ function renderReferenceAnalysisPanel(refAnalysis, ownAnalysis, rm) {
 }
 
 function renderReferenceMatch(rm, refAnalysis, ownAnalysis) {
+  const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
   const panel = document.createElement("div");
   panel.className = "ref-match-panel";
   const pct = rm.after?.match_percent ?? 0;
@@ -837,7 +838,7 @@ function renderReferenceMatch(rm, refAnalysis, ownAnalysis) {
     <div class="ref-match-score-circle"><span class="score-num">${pct}%</span><span class="score-label">MATCH TONAL</span></div>
     <div class="match-stage-cols">${stageBars}</div>
     <div>
-      ${report.overall_score !== undefined ? `<div class="lgjs-s-2db3fd7b">Puntaje inteligente general: <b>${report.overall_score}/100 (${report.grade})</b></div>` : ""}
+      ${report.overall_score !== undefined ? `<div class="lgjs-s-2db3fd7b">Puntaje inteligente general: <b>${esc(report.overall_score)}/100 (${esc(report.grade ?? '')})</b></div>` : ""}
     </div>
   </div>
   <div class="lgjs-s-01219b21">Loudness</div>
@@ -871,13 +872,13 @@ function renderReferenceMatch(rm, refAnalysis, ownAnalysis) {
       const refPct = 50 + (refVal / maxV) * 45;
       const srcPct = 50 + (srcVal / maxV) * 45;
       const diff = Math.abs(refVal - srcVal);
-      const color = diff < 1.5 ? "var(--green,#3c6)" : diff < 3 ? "var(--amber,#fa0)" : "var(--red,#e05)";
+      const color = diff < 1.5 ? "var(--ui-good,#3c6)" : diff < 3 ? "var(--ui-warn,#fa0)" : "var(--ui-danger,#e05)";
       return `<div class="lgjs-s-0397441f">
         <span class="lgjs-s-2dd04810">${label}</span>
         <div class="lgjs-s-f2285fd6">
           <div class="lgjs-s-bd475080"></div>
-          <div title="Referencia" style="position:absolute;left:${refPct.toFixed(1)}%;top:-1px;width:3px;height:8px;background:var(--accent2,#06b6d4);border-radius:1px"></div>
-          <div title="Original" style="position:absolute;left:${srcPct.toFixed(1)}%;top:-1px;width:3px;height:8px;background:var(--accent,#7c3aed);opacity:0.7;border-radius:1px"></div>
+          <div title="Referencia" style="position:absolute;left:${refPct.toFixed(1)}%;top:-1px;width:3px;height:8px;background:var(--ui-accent-2,#06b6d4);border-radius:1px"></div>
+          <div title="Original" style="position:absolute;left:${srcPct.toFixed(1)}%;top:-1px;width:3px;height:8px;background:var(--ui-accent,#7c3aed);opacity:0.7;border-radius:1px"></div>
         </div>
         <span style="width:2.5rem;text-align:right;color:${color};font-family:var(--mono)">${refVal >= 0 ? '+' : ''}${refVal.toFixed(1)}</span>
       </div>`;
@@ -968,7 +969,7 @@ function playAB(slot) {
   const wrap = LGMDM.dom.requireById("abAudioWrap", "08-reference-mastering:playAB");
   if (_abCurrentUrl) URL.revokeObjectURL(_abCurrentUrl);
   _abCurrentUrl = URL.createObjectURL(snap.blob);
-  wrap.innerHTML = `<div style="font-family:var(--mono);font-size:.75rem;color:${slot === "A" ? "var(--accent)" : "var(--yellow)"};margin-bottom:.3rem">▶ ${slot}</div><audio controls src="${LGMDM.ui.safeAudioSrc(_abCurrentUrl)}" class="lgjs-s-0466783d"></audio>`;
+  wrap.innerHTML = `<div style="font-family:var(--mono);font-size:.75rem;color:${slot === "A" ? "var(--ui-accent)" : "var(--ui-warn)"};margin-bottom:.3rem">▶ ${slot}</div><audio controls src="${LGMDM.ui.safeAudioSrc(_abCurrentUrl)}" class="lgjs-s-0466783d"></audio>`;
 }
 
 // ── Advice ────────────────────────────────────────────────────

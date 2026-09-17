@@ -21,67 +21,6 @@
 // (ver streaming_engine.py). Se recalcula cada ~6s de audio, no en cada chunk,
 // así que comparamos por "summary" para no re-renderizar (y resetear el botón
 // "Aplicado") en cada uno de los chunks que repiten la misma detección.
-let _lastDynEqRec = null;
-let _lastDynEqRecSummary = null;
-
-function renderDynEqRecommendation(rec) {
-  if (!rec) return;
-  _lastDynEqRec = rec;
-  if (rec.summary === _lastDynEqRecSummary) return;
-  _lastDynEqRecSummary = rec.summary;
-
-  const wrap = document.getElementById("dynEqRecWrap");
-  const body = document.getElementById("dynEqRecBody");
-  if (!wrap || !body) return;
-  wrap.style.display = "block";
-
-  const resonances = rec.resonances || [];
-  const sib = rec.sibilance || {};
-
-  let html = `<div class="lgjs-s-e9520ddd">${LGMDM.ui.escapeHtml(rec.summary || "")}</div>`;
-
-  if (resonances.length) {
-    html += `<div class="lgjs-s-a4f22f28"><b>Resonancias detectadas:</b><ul class="lgjs-s-5acdf251">`;
-    resonances.slice(0, 4).forEach((r, i) => {
-      html += `<li>${Number(r.freq_hz).toFixed(0)} Hz (+${Number(r.excess_db).toFixed(1)} dB)${i === 0 ? ' — <span class="lgjs-s-581bc0b4">se usará para Reso</span>' : ""}</li>`;
-    });
-    html += `</ul></div>`;
-  }
-
-  if (sib.present) {
-    html += `<div class="lgjs-s-a4f22f28"><b>Sibilancia:</b> ${Number(sib.band_hz?.[0] ?? 0).toFixed(0)}-${Number(sib.band_hz?.[1] ?? 0).toFixed(0)} Hz, severidad ${Number(sib.severity_db ?? 0).toFixed(1)} dB (${Number(sib.frames_flagged_pct ?? 0).toFixed(1)}% de cuadros)</div>`;
-  }
-
-  if (!resonances.length && !sib.present) {
-    html += `<div class="lgjs-s-57f9e31d">Sin problemas relevantes detectados en este momento del track.</div>`;
-  }
-
-  html += `<div class="lgjs-s-bde49a8d">
-    <button id="dynEqApplyBtn" class="lgjs-s-97445a8d">✓ Aplicar a Reso / De-esser</button>
-  </div>`;
-
-  body.innerHTML = html;
-
-  const applyBtn = document.getElementById("dynEqApplyBtn");
-  if (applyBtn) {
-    applyBtn.addEventListener("click", () => {
-      if (!_lastDynEqRec || !_lastDynEqRec.recommended_params) return;
-      applyPresetToUI(_lastDynEqRec.recommended_params);
-      applyBtn.textContent = "✓ Aplicado";
-      applyBtn.disabled = true;
-    });
-  }
-}
-
-function hideDynEqRecommendation() {
-  const wrap = document.getElementById("dynEqRecWrap");
-  if (wrap) wrap.style.display = "none";
-  const body = document.getElementById("dynEqRecBody");
-  if (body) body.innerHTML = "";
-  _lastDynEqRec = null;
-  _lastDynEqRecSummary = null;
-}
-
 // ── FFT rendering ────────────────────────────────────────────
 function drawFFTOnCanvas(canvas, series) {
   const dpr = window.devicePixelRatio || 1;
@@ -169,7 +108,7 @@ function renderFFT(series) {
   const legendHtml = series
     .map(
       (s) =>
-        `<span style="color:${s.color || "var(--accent)"}">■</span> <span class="lgjs-s-e8faeec7">${s.label}</span>`,
+        `<span style="color:${s.color || "var(--ui-accent)"}">■</span> <span class="lgjs-s-e8faeec7">${s.label}</span>`,
     )
     .join("");
   wrap.innerHTML = `<h3>Spectrum Analyzer (FFT)</h3><canvas></canvas><div class="lgjs-s-acef0958">${legendHtml}</div>`;
@@ -284,21 +223,22 @@ function perceptualPanelHtml(a, titleSuffix) {
   const fatigue = Math.round((p.fatigue_risk ?? 0) * 100);
   const fatigueClass = fatigue >= 70 ? "bad" : fatigue >= 40 ? "warn" : "good";
 
+  const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
   const rows = Object.entries(PERCEPTUAL_LABELS)
     .map(([key, label]) => {
       const val = p[key];
       if (val == null || val === "unknown") return "";
       const cls = perceptualValueClass(key, val);
-      const text = String(val).replace(/_/g, " ");
-      return `<div class="metric-row"><span class="metric-label">${label}</span><span class="metric-value ${cls}">${text}</span></div>`;
+      const text = esc(String(val).replace(/_/g, " "));
+      return `<div class="metric-row"><span class="metric-label">${esc(label)}</span><span class="metric-value ${cls}">${text}</span></div>`;
     })
     .join("");
 
   return `
     <div class="analysis-panel perceptual-panel">
       <h3>👂 Cómo suena${titleSuffix ? " " + titleSuffix : ""}</h3>
-      ${genre ? `<div class="perceptual-genre"><span class="perceptual-genre-tag">${genre}</span>${genreConf != null ? `<span class="perceptual-genre-conf">${genreConf}% confianza</span>` : ""}</div>` : ""}
-      ${diagnosis ? `<p class="perceptual-diagnosis">${diagnosis}</p>` : ""}
+      ${genre ? `<div class="perceptual-genre"><span class="perceptual-genre-tag">${esc(genre)}</span>${genreConf != null ? `<span class="perceptual-genre-conf">${esc(genreConf)}% confianza</span>` : ""}</div>` : ""}
+      ${diagnosis ? `<p class="perceptual-diagnosis">${esc(diagnosis)}</p>` : ""}
       <div class="perceptual-fatigue">
         <span class="metric-label">Riesgo de fatiga</span>
         <div class="perceptual-fatigue-bar">
@@ -338,8 +278,8 @@ function renderAnalysisComparison(before, after) {
   renderSpectrum([before, after], ["before", "after"]);
   if (before.fft_spectrum && after.fft_spectrum) {
     renderFFT([
-      { label: "Antes", data: before.fft_spectrum, color: "var(--muted)" },
-      { label: "Después", data: after.fft_spectrum, color: "var(--accent)" },
+      { label: "Antes", data: before.fft_spectrum, color: "var(--ui-muted)" },
+      { label: "Después", data: after.fft_spectrum, color: "var(--ui-accent)" },
     ]);
   }
 }
@@ -353,56 +293,64 @@ let _abNode         = null;   // AudioBufferSourceNode activo
 let _abStartTime    = 0;      // AudioContext.currentTime cuando arrancó la reproducción
 let _abOffset       = 0;      // posición en el buffer al momento de arrancar
 let _abPlaying      = false;
-let _abGain         = null;   // GainNode para fade suave en el toggle
+let _abRafId        = null;
+let _abGain         = null;
 let _abUiTimer      = null;
 
-// ── Nueva función para dibujar waveforms superpuestas ────────
-function drawOverlayWaveforms(originalBuffer, masterBuffer, canvas) {
+function renderABWaveforms(originalBuffer, masterBuffer) {
+  const canvas = document.getElementById("abWaveformCanvas");
   if (!canvas) return;
   const dpr = window.devicePixelRatio || 1;
-  const W = canvas.clientWidth || 600,
-    H = 120;
-  canvas.width = W * dpr;
+  const W = canvas.clientWidth || 600;
+  const H = canvas.clientHeight || 120;
+  canvas.width  = W * dpr;
   canvas.height = H * dpr;
   const ctx = canvas.getContext("2d");
-  ctx.scale(dpr, dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   const theme = themeColors();
   ctx.fillStyle = theme.surface2;
   ctx.fillRect(0, 0, W, H);
 
-  // Función para dibujar un waveform con un color y opacidad
-  function drawBufferWaveform(buffer, color, alpha, label) {
-    const data = buffer.getChannelData(0);
+  // Línea central
+  ctx.strokeStyle = theme.border;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, H / 2);
+  ctx.lineTo(W, H / 2);
+  ctx.stroke();
+
+  function drawBufferWaveform(buf, color, alpha, label) {
+    const data = buf.getChannelData(0);
     const step = Math.ceil(data.length / W);
-    const resolvedColor = color.startsWith("var(") ? theme.get(color.slice(4, -1)) : color;
-    ctx.strokeStyle = resolvedColor;
-    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color.startsWith("var(") ? theme.get(color.slice(4, -1)) : color;
     ctx.lineWidth = 1.2;
+    ctx.globalAlpha = alpha;
     ctx.beginPath();
     for (let i = 0; i < W; i++) {
-      let min = 1,
-        max = -1;
+      let min = 1, max = -1;
       for (let j = 0; j < step; j++) {
         const v = data[i * step + j] || 0;
         if (v < min) min = v;
         if (v > max) max = v;
       }
-      const yMin = (1 - (min + 1) / 2) * H,
-        yMax = (1 - (max + 1) / 2) * H;
+      const yMin = (1 - (min + 1) / 2) * H;
+      const yMax = (1 - (max + 1) / 2) * H;
       if (i === 0) ctx.moveTo(i, yMin);
       else ctx.lineTo(i, yMin);
       ctx.lineTo(i, yMax);
     }
     ctx.stroke();
     ctx.globalAlpha = 1;
-    // Etiqueta en la esquina superior derecha
-    ctx.fillStyle = resolvedColor;
+
+    // Etiqueta de leyenda en el canvas
+    ctx.fillStyle = color.startsWith("var(") ? theme.get(color.slice(4, -1)) : color;
     ctx.font = "10px monospace";
     ctx.fillText(label, W - 80, 14);
   }
 
-  if (originalBuffer) drawBufferWaveform(originalBuffer, "var(--muted)", 0.6, "Original");
-  if (masterBuffer) drawBufferWaveform(masterBuffer, "var(--accent2)", 0.9, "Master");
+  if (originalBuffer) drawBufferWaveform(originalBuffer, "var(--ui-muted)", 0.6, "Original");
+  if (masterBuffer) drawBufferWaveform(masterBuffer, "var(--ui-accent-2)", 0.9, "Master");
 }
 
 // ── A/B player existente con integración de waveforms ────────
@@ -419,6 +367,40 @@ function _abCurrentPosition() {
   const ctx = window.LGMDM.state.audio.context;
   if (!_abPlaying || !ctx) return _abOffset;
   return _abOffset + (ctx.currentTime - _abStartTime);
+}
+
+function _abSyncUI() {
+  const isMaster = _abMode === "master";
+  const activeBuf = isMaster ? _abMasterBuf : _abOriginalBuf;
+  const dur = activeBuf ? activeBuf.duration : 0;
+  const ctx = _abGetCtx();
+  const pos = _abPlaying
+    ? Math.min(dur, _abOffset + (ctx.currentTime - _abStartTime))
+    : _abOffset;
+  const pct = dur > 0 ? (pos / dur) * 100 : 0;
+  const label = isMaster ? "Master (procesado)" : "Original (sin procesar)";
+  const toggleLabel = isMaster ? "Escuchar Original" : "Escuchar Master";
+
+  const labelEl  = document.getElementById("abLabel");
+  const toggleEl = document.getElementById("btnABToggle");
+  const barEl    = document.getElementById("abProgressBar");
+  const timeEl   = document.getElementById("abTimeReadout");
+  const playEl   = document.getElementById("btnABPlay");
+
+  if (labelEl)  labelEl.textContent = label;
+  if (labelEl)  labelEl.style.color = isMaster ? "var(--ui-accent)" : "var(--ui-muted)";
+  if (toggleEl) toggleEl.textContent = toggleLabel;
+  if (barEl)    barEl.style.width = pct.toFixed(1) + "%";
+  if (timeEl && dur > 0) {
+    const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+    timeEl.textContent = fmt(pos) + " / " + fmt(dur);
+  }
+  if (playEl)   playEl.textContent = _abPlaying ? "⏸" : "▶";
+
+  const waveformCanvas = document.getElementById("abWaveformCanvas");
+  if (waveformCanvas && _abOriginalBuf && _abMasterBuf) {
+    renderABWaveforms(_abOriginalBuf, _abMasterBuf);
+  }
 }
 
 function _abStop() {
@@ -509,7 +491,7 @@ function _updateABUI() {
   const playEl   = document.getElementById("btnABPlay");
 
   if (labelEl)  labelEl.textContent = label;
-  if (labelEl)  labelEl.style.color = isMaster ? "var(--accent)" : "var(--muted)";
+  if (labelEl)  labelEl.style.color = isMaster ? "var(--ui-accent)" : "var(--ui-muted)";
   if (toggleEl) toggleEl.textContent = toggleLabel;
   if (barEl)    barEl.style.width = pct.toFixed(1) + "%";
   if (timeEl && dur > 0) {
@@ -579,8 +561,13 @@ function _renderABPlayer() {
     _updateABUI();
   });
 
-  if (!_abUiTimer) _abUiTimer = setInterval(() => { if (_abPlaying) _updateABUI(); }, 200);
+  if (_abUiTimer) clearInterval(_abUiTimer);
+  _abUiTimer = setInterval(() => { if (_abPlaying) _updateABUI(); }, 200);
   _updateABUI();
+}
+
+function teardownABUiTimer() {
+  if (_abUiTimer) { clearInterval(_abUiTimer); _abUiTimer = null; }
 }
 
 async function setupABPlayer(masterBlob) {
@@ -605,17 +592,6 @@ async function setupABPlayer(masterBlob) {
   _abPlaying     = false;
 
   _renderABPlayer();
-}
-
-function teardownABPlayer() {
-  _abStop();
-  if (_abUiTimer) { clearInterval(_abUiTimer); _abUiTimer = null; }
-  // El contexto es compartido y su ciclo de vida pertenece a 00-audio-engine.js.
-
-  _abOriginalBuf = null;
-  _abMasterBuf   = null;
-  _abMode = "master";
-  _abOffset = 0;
 }
 
 // ── Estado y UI del preview ──────────────────────────────────
@@ -700,3 +676,8 @@ function renderProfessionalMeter(a) {
 
 
 // ── Array de IDs que disparan preview (se usa en 10) ────────
+
+// Expose teardown for cleanup
+window.LGMDM = window.LGMDM || {};
+window.LGMDM.visualizers = Object.assign(window.LGMDM.visualizers || {}, { teardownABUiTimer });
+

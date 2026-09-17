@@ -418,12 +418,10 @@ function drawWaveform(audioBuffer) {
   // Si la pestaña Analysis está oculta al dibujar, clientWidth da 0/incorrecto
   // — se resuelve llamando a esta misma función de nuevo cuando la pestaña
   // se hace visible (enganchado en 29-analysis-view.js → redraw()).
-  renderWaveformToCanvas(canvas, buf, "var(--muted)");
+  renderWaveformToCanvas(canvas, buf, "var(--ui-muted)");
 }
-window.LGMDM = window.LGMDM || {};
-window.LGMDM.waveform = { redraw: () => drawWaveform() };
 
-function renderWaveformToCanvas(canvas, audioBuffer, color = "var(--accent)", alpha = 1) {
+function renderWaveformToCanvas(canvas, audioBuffer, color = "var(--ui-accent)", alpha = 1) {
   const dpr = window.devicePixelRatio || 1;
   const W = canvas.clientWidth || 600,
     H = 100;
@@ -478,10 +476,10 @@ function showLoudnessMeter(lufsValue) {
   fill.style.width = pct + "%";
   fill.style.background =
     lufsValue > -6
-      ? "var(--red)"
+      ? "var(--ui-danger)"
       : lufsValue > -9
-        ? "var(--yellow)"
+        ? "var(--ui-warn)"
         : lufsValue >= -18
-          ? "var(--yellow)"
-          : "var(--muted)";
+          ? "var(--ui-warn)"
+          : "var(--ui-muted)";
 }

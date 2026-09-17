@@ -108,8 +108,7 @@
     return `${m}:${s}`;
   }
 
-  function clamp01(v) { return Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0)); }
-  function metricAmp(db, floor = -72) { return clamp01((Number(db ?? floor) - floor) / (0 - floor)); }
+  function metricAmp(db, floor = -72) { return window.clamp01((Number(db ?? floor) - floor) / (0 - floor)); }
 
   function drawWaveform() {
     const canvas = LGMDM.dom.byId('lgmdmWaveformCanvas'); if (!canvas) return;
@@ -164,7 +163,7 @@
 
   function setStatus(text, active=false) { LGMDM.dom.byId('consoleStatus')?.replaceChildren(document.createTextNode(text)); document.querySelector('.lg-status-dot')?.classList.toggle('active',active); }
   function syncTrackInfo() {
-    const file=window.selectedFile;
+    const file = LGMDM.state?.selectedFile ?? null;
     if(!file){
       LGMDM.dom.byId('consoleTrackTitle')?.replaceChildren(document.createTextNode('Sin archivo cargado'));
       LGMDM.dom.byId('consoleTrackMeta')?.replaceChildren(document.createTextNode('Esperando señal'));
@@ -175,25 +174,56 @@
     LGMDM.dom.byId('consoleTrackMeta')?.replaceChildren(document.createTextNode(`${file.type||'audio'} · ${(file.size/1024/1024).toFixed(1)} MB`));
     setStatus('Audio cargado · listo para analizar',true);
   }
+  // Re-entry guards (MX-13). Both syncMetersFromDom and syncChainMeters can be
+  // invoked multiple times per frame: syncMetersFromDom from the rAF tick at
+  // ~16ms when workspace=console, and syncChainMeters from the LGMDM.metrics
+  // subscriber (which can fire every preview tick). JS is single-threaded, so
+  // the worst case is duplicated work + "last-call-wins"; coalesce via guard +
+  // queueMicrotask so we collapse bursts into one re-execution.
+  let _metersSyncInFlight = false;
+  let _metersSyncPending = false;
+  let _lastMetrics = null;
+
   function syncMetersFromDom(){
-    const map=[['meterPeakReadout','consolePeak'],['meterLufsReadout','consoleLufs'],['meterTruePeakReadout','consoleTruePeak'],['meterRmsReadout','consoleRms'],['stereoMeterReadout','consoleCorr']];
-    for(const [src,dst] of map){const a=LGMDM.dom.byId(src),b=LGMDM.dom.byId(dst);if(a&&b&&a.textContent)b.textContent=a.textContent.replace(/^corr:\s*/i,'');}
-    updateConsoleStereoVu();
+    if (_metersSyncInFlight) { _metersSyncPending = true; return; }
+    _metersSyncInFlight = true;
+    try {
+      const map=[['meterPeakReadout','consolePeak'],['meterLufsReadout','consoleLufs'],['meterTruePeakReadout','consoleTruePeak'],['meterRmsReadout','consoleRms'],['stereoMeterReadout','consoleCorr']];
+      for(const [src,dst] of map){const a=LGMDM.dom.byId(src),b=LGMDM.dom.byId(dst);if(a&&b&&a.textContent)b.textContent=a.textContent.replace(/^corr:\s*/i,'');}
+      updateConsoleStereoVu();
+    } finally {
+      _metersSyncInFlight = false;
+      if (_metersSyncPending) {
+        _metersSyncPending = false;
+        queueMicrotask(syncMetersFromDom);
+      }
+    }
   }
 
   function syncChainMeters(metrics){
-    if (!metrics) return;
-    const chain = metrics.chain_meters || metrics.chainMeters || {};
-    const comp = chain.comp || metrics.comp_meters || {};
-    const glue = chain.glue || metrics.glue_meters || {};
-    const limiter = chain.limiter || metrics.limiter_meters || {};
-    const compGr = Number(comp.gr_db ?? metrics.comp_gr_db ?? 0);
-    const glueGr = Number(glue.gr_db ?? 0);
-    const limGr = Number(limiter.gr_db ?? metrics.limiter_gr_db ?? 0);
-    if (LGMDM.dom.byId('consoleCompGr')) LGMDM.dom.byId('consoleCompGr').textContent = `GR ${(Number.isFinite(compGr)?compGr:0).toFixed(1)} dB`;
-    if (LGMDM.dom.byId('consoleLimiterGr')) LGMDM.dom.byId('consoleLimiterGr').textContent = `GR ${(Number.isFinite(limGr)?limGr:0).toFixed(1)} dB`;
-    const glueReadout = LGMDM.dom.byId('consoleGlueGr'); if (glueReadout) glueReadout.textContent = `GR ${(Number.isFinite(glueGr)?glueGr:0).toFixed(1)} dB`;
-    if (LGMDM.dom.byId('consoleOutputReadout')) LGMDM.dom.byId('consoleOutputReadout').textContent = metrics.output_lufs != null ? `${Number(metrics.output_lufs).toFixed(1)} LUFS` : (LGMDM.dom.byId('consoleLufs')?.textContent || '-∞ LUFS');
+    if (metrics) _lastMetrics = metrics;
+    if (_metersSyncInFlight) { _metersSyncPending = true; return; }
+    _metersSyncInFlight = true;
+    try {
+      if (!_lastMetrics) return;
+      const chain = _lastMetrics.chain_meters || _lastMetrics.chainMeters || {};
+      const comp = chain.comp || _lastMetrics.comp_meters || {};
+      const glue = chain.glue || _lastMetrics.glue_meters || {};
+      const limiter = chain.limiter || _lastMetrics.limiter_meters || {};
+      const compGr = Number(comp.gr_db ?? _lastMetrics.comp_gr_db ?? 0);
+      const glueGr = Number(glue.gr_db ?? 0);
+      const limGr = Number(limiter.gr_db ?? _lastMetrics.limiter_gr_db ?? 0);
+      if (LGMDM.dom.byId('consoleCompGr')) LGMDM.dom.byId('consoleCompGr').textContent = `GR ${(Number.isFinite(compGr)?compGr:0).toFixed(1)} dB`;
+      if (LGMDM.dom.byId('consoleLimiterGr')) LGMDM.dom.byId('consoleLimiterGr').textContent = `GR ${(Number.isFinite(limGr)?limGr:0).toFixed(1)} dB`;
+      const glueReadout = LGMDM.dom.byId('consoleGlueGr'); if (glueReadout) glueReadout.textContent = `GR ${(Number.isFinite(glueGr)?glueGr:0).toFixed(1)} dB`;
+      if (LGMDM.dom.byId('consoleOutputReadout')) LGMDM.dom.byId('consoleOutputReadout').textContent = _lastMetrics.output_lufs != null ? `${Number(_lastMetrics.output_lufs).toFixed(1)} LUFS` : (LGMDM.dom.byId('consoleLufs')?.textContent || '-∞ LUFS');
+    } finally {
+      _metersSyncInFlight = false;
+      if (_metersSyncPending) {
+        _metersSyncPending = false;
+        queueMicrotask(() => syncChainMeters(null));
+      }
+    }
   }
 
   root.console.syncChainMeters = syncChainMeters;
@@ -238,7 +268,7 @@
       const bind = window.LGMDM.ui.bindOnce;
       bind(livePreviewToggle, 'change', (ev) => {
         if (ev && ev.isTrusted === false) return;
-        if (livePreviewToggle.checked && window.selectedFile) {
+        if (livePreviewToggle.checked && LGMDM.state?.selectedFile) {
           setStatus('Preview habilitado · procesando en servidor…', true);
           window.LGMDM?.previewController?.request?.();
         } else if (!livePreviewToggle.checked) {
@@ -263,7 +293,9 @@
     });
     syncTrackInfo(); updateReadouts(); updateStageCards();
     const observer=new MutationObserver(syncTrackInfo); const fileName=LGMDM.dom.byId('fileName'); if(fileName)observer.observe(fileName,{childList:true,subtree:true,characterData:true});
+    state._fileNameObserver = observer;
     const tick=()=>{
+      if (!wired) return;
       const onConsole = document.body.dataset.workspace === "console";
       if(onConsole){ drawWaveform(); syncMetersFromDom(); window.LGMDM?.spectrum?.redraw?.(); }
       state.audio=getPreviewAudio();
@@ -310,5 +342,11 @@
     limiter_bypass: !!state.stageBypass.limiter,
   });
   root.console.setAB=setAB; root.console.toggleAB=toggleAB; root.console.schedulePreview=scheduleConsolePreview;
+  function teardown(){
+    if(state.raf){ cancelAnimationFrame(state.raf); state.raf=0; }
+    if(state._fileNameObserver){ state._fileNameObserver.disconnect(); state._fileNameObserver=null; }
+    wired=false;
+  }
+  root.console.teardown=teardown;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
 })();

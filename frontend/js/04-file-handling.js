@@ -79,7 +79,6 @@
         window.LGMDM?.previewController?.stop?.({ silent: true, cancelSource: true });
         if (document.getElementById("previewAudioWrap")) document.getElementById("previewAudioWrap").replaceChildren();
         window.LGMDM?.spectrum?.clear?.();
-        hideDynEqRecommendation();
         setPreviewStatus("Preview deshabilitado");
 
         if (typeof window.LGMDM?.meters?.teardownLiveMeters === 'function') window.LGMDM.meters.teardownLiveMeters();
@@ -262,5 +261,24 @@
       // dependía de #toggleRefLibraryList/#libraryListRef.
 
       // ── EQ Curve ─────────────────────────────────────────────────────────────────
+
+  // ── Library Service (migrado desde 00-library-service.js) ───────────
+  const library = LGMDM.library = LGMDM.library || {};
+  if (typeof library.saveLocalFile !== 'function') {
+    library.saveLocalFile = async function saveLocalFile(file, options = {}) {
+      if (!(file instanceof File)) throw new TypeError('saveLocalFile requiere un File');
+      const form = new FormData();
+      form.append('file', file);
+      const response = await LGMDM.api.apiFetch(`${LGMDM.api.apiBase()}/library/upload`, { method: 'POST', body: form });
+      if (!response.ok) {
+        const error = new Error(`HTTP ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+      const payload = await response.json().catch(() => ({}));
+      global.dispatchEvent(new CustomEvent('lgmdm:library-updated', { detail: { kind: options.kind || 'track', file: file.name, payload } }));
+      return payload;
+    };
+  }
 
 })(window);

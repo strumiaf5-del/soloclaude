@@ -1,12 +1,11 @@
 /* LGMDM Studio — modular dark workstation surface */
-.lg-studio-shell{display:grid;grid-template-columns:220px minmax(0,1fr) 310px;gap:12px;margin:12px 0 0;min-height:0}
+.lg-studio-shell{display:block;margin:12px 0 0;min-height:0}
 .lg-studio-column{min-width:0;background:linear-gradient(180deg,rgba(18,21,27,.98),rgba(11,13,17,.98));border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.24)}
-.lg-studio-left{padding:12px;overflow:auto;max-height:760px}
-.lg-studio-center{padding:12px;display:grid;grid-template-rows:auto auto auto;gap:12px}
-.lg-studio-right{padding:10px;overflow:auto;max-height:760px}
+.lg-studio-left,.lg-studio-right{display:none!important}
+.lg-studio-center{padding:12px;display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px}
 .studio-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
 .studio-heading strong{font:700 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}
-.studio-heading small{font:500 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted,#89909d);text-transform:uppercase}
+.studio-heading small{font:500 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ui-muted,#89909d);text-transform:uppercase}
 .studio-family{border-top:1px solid rgba(255,255,255,.06);padding:10px 0 4px}
 .studio-family:first-child{border-top:0;padding-top:0}
 .studio-family-title{display:flex;justify-content:space-between;margin-bottom:6px;color:#8e98a8;font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}
@@ -39,7 +38,7 @@
 .studio-band-state-hint{padding:8px;border-radius:7px;background:rgba(255,255,255,.025);color:#747f8e;font:500 9px ui-monospace,SFMono-Regular,Menlo,monospace}
 .studio-plugin-actions{display:flex;gap:6px;margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)}.studio-action-btn{flex:1;border:1px solid rgba(255,255,255,.08);background:#171c23;color:#b7c0cb;border-radius:7px;padding:7px;font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer}.studio-action-btn.danger{color:#ef8b86}.studio-add-plugin{width:100%;padding:10px;border:1px dashed rgba(255,255,255,.12);border-radius:9px;background:transparent;color:#77818e;font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer}.studio-add-plugin:hover{border-color:rgba(105,228,174,.3);color:#9cebc5}
 .lg-studio-active .lg-pro-expert-banner,.lg-studio-active .lg-pro-expert-panel{display:none!important}
-.lg-studio-active .lg-console-controlbar,.lg-studio-active .lg-chain-control-strip{display:none!important}
+.lg-studio-active .lg-console-controlbar,.lg-studio-active .lg-chain-control-strip{display:flex!important}
 @media (max-width:1200px){.lg-studio-shell{grid-template-columns:190px minmax(0,1fr) 280px}.studio-gr-grid{grid-template-columns:1fr}.studio-telemetry-empty{display:none}}
 @media (max-width:960px){.lg-studio-shell{grid-template-columns:1fr;}.lg-studio-left,.lg-studio-right{max-height:none}.lg-studio-center{order:-1}.lg-studio-right{order:2}.studio-family{display:inline-block;vertical-align:top;width:49%}}
 @media (max-width:640px){.studio-family{width:100%}.lg-studio-shell{gap:8px}.lg-studio-column{border-radius:10px}.studio-control-row{grid-template-columns:75px minmax(0,1fr) 52px}}

@@ -106,7 +106,6 @@
     const result = window.LGMDM.undo.manager.undo();
     if (result) {
       window.LGMDM.ui.showToast?.(`Deshacer: ${result.label}`, 'info', 2000);
-      window.LGMDM?.a11y?.announce?.(`Deshacer: ${result.label}`, 'assertive');
       window.applyMasteringState?.(result.state);
     }
   };
@@ -115,17 +114,7 @@
     const result = window.LGMDM.undo.manager.redo();
     if (result) {
       window.LGMDM.ui.showToast?.(`Rehacer: ${result.label}`, 'info', 2000);
-      window.LGMDM?.a11y?.announce?.(`Rehacer: ${result.label}`, 'assertive');
       window.applyMasteringState?.(result.state);
-    }
-  };
-
-  // ── Rastrear cambios en parámetros ──
-  function trackParameterChange(paramName, newValue) {
-    // Obtener estado actual (esto requiere que exista buildMasteringParams)
-    if (typeof window.LGMDM?.params?.build === 'function') {
-      const currentState = window.LGMDM.params.build();
-      window.LGMDM.undo.manager.saveState(currentState, `Cambiar ${paramName}`);
     }
   };
 
@@ -142,16 +131,16 @@
       right: 0;
       width: 280px;
       max-height: 400px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-left: 2px solid var(--accent);
-      border-radius: 8px;
+      background: var(--ui-surface-2);
+      border: 1px solid var(--ui-border);
+      border-left: 2px solid var(--ui-accent);
+      border-radius: var(--radius, 8px);
       padding: 12px;
-      z-index: 8999;
+      z-index: var(--z-modal, 1200);
       box-shadow: -4px 4px 12px rgba(0, 0, 0, 0.3);
       font-family: var(--sans);
       font-size: 0.85em;
-      color: var(--text);
+      color: var(--ui-text);
       display: none;
     `;
 
@@ -187,7 +176,7 @@
           const li = document.createElement('div');
           li.style.cssText = `
             padding: 4px 8px;
-            background: var(--surface3);
+            background: var(--ui-surface-3);
             border-radius: 4px;
             margin-bottom: 4px;
             cursor: pointer;
@@ -197,10 +186,10 @@
           li.textContent = `• ${item.label}`;
           li.addEventListener('click', window.LGMDM.undo.undoLastChange);
           li.addEventListener('mouseenter', () => {
-            li.style.background = 'var(--border)';
+            li.style.background = 'var(--ui-border)';
           });
           li.addEventListener('mouseleave', () => {
-            li.style.background = 'var(--surface3)';
+            li.style.background = 'var(--ui-surface-3)';
           });
           list.appendChild(li);
         });
@@ -210,14 +199,14 @@
       if (history.redo.length > 0) {
         const redoTitle = document.createElement('div');
         redoTitle.textContent = '🔜 Rehacer';
-        redoTitle.style.cssText = 'font-weight: 600; margin: 12px 0 4px 0; color: var(--vu-green);';
+        redoTitle.style.cssText = 'font-weight: 600; margin: 12px 0 4px 0; color: var(--ui-good);';
         list.appendChild(redoTitle);
 
         history.redo.slice().reverse().forEach(item => {
           const li = document.createElement('div');
           li.style.cssText = `
             padding: 4px 8px;
-            background: var(--surface3);
+            background: var(--ui-surface-3);
             border-radius: 4px;
             margin-bottom: 4px;
             cursor: pointer;
@@ -227,10 +216,10 @@
           li.textContent = `• ${item.label}`;
           li.addEventListener('click', window.LGMDM.undo.redoLastChange);
           li.addEventListener('mouseenter', () => {
-            li.style.background = 'var(--border)';
+            li.style.background = 'var(--ui-border)';
           });
           li.addEventListener('mouseleave', () => {
-            li.style.background = 'var(--surface3)';
+            li.style.background = 'var(--ui-surface-3)';
           });
           list.appendChild(li);
         });
@@ -239,7 +228,7 @@
       if (history.undo.length === 0 && history.redo.length === 0) {
         const empty = document.createElement('div');
         empty.textContent = 'Sin historial aún';
-        empty.style.cssText = 'color: var(--muted); text-align: center; padding: 16px 0;';
+        empty.style.cssText = 'color: var(--ui-muted); text-align: center; padding: 16px 0;';
         list.appendChild(empty);
       }
     });
@@ -251,37 +240,29 @@
   window.LGMDM.undo.toggleHistoryPanel = function() {
     const panel = document.getElementById('history-panel') || createHistoryPanel();
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    window.LGMDM?.a11y?.announce?.('Panel de historial ' + (panel.style.display === 'none' ? 'cerrado' : 'abierto'), 'polite');
   };
 
   // ── Agregar botón al header ──
   function addHistoryToggleButton() {
+    const headerRight = document.querySelector('.header-right');
     const header = document.querySelector('header');
-    if (!header) return;
+    const target = headerRight || header;
+    if (!target) return;
+    if (document.getElementById('historyToggleBtn')) return;
 
     const historyBtn = document.createElement('button');
     historyBtn.id = 'historyToggleBtn';
+    historyBtn.className = 'header-btn';
     historyBtn.textContent = '⏱️ Historial';
     historyBtn.setAttribute('aria-label', 'Mostrar historial de cambios (Ctrl+H)');
-    historyBtn.style.cssText = `
-      background: none;
-      border: none;
-      color: var(--text);
-      cursor: pointer;
-      padding: 8px 12px;
-      font-size: 0.9em;
-      font-weight: 500;
-      transition: color 0.2s;
-    `;
     historyBtn.addEventListener('click', window.LGMDM.undo.toggleHistoryPanel);
-    historyBtn.addEventListener('mouseenter', () => {
-      historyBtn.style.color = 'var(--accent)';
-    });
-    historyBtn.addEventListener('mouseleave', () => {
-      historyBtn.style.color = 'var(--text)';
-    });
 
-    header.appendChild(historyBtn);
+    const themeSwitcher = document.getElementById('theme-switcher-btn');
+    if (headerRight && themeSwitcher && themeSwitcher.parentNode === headerRight) {
+      headerRight.insertBefore(historyBtn, themeSwitcher);
+    } else {
+      target.appendChild(historyBtn);
+    }
   }
 
   // ── Agregar atajo Ctrl+H para mostrar historial ──
@@ -307,4 +288,24 @@
     addHistoryToggleButton();
   }
 
+  // ── Aplicar estado restaurado por undo/redo ──
+  window.applyMasteringState = function applyMasteringState(state) {
+    if (!state || typeof state !== 'object') return;
+    const applyPreset = window.applyPresetToUI;
+    if (typeof applyPreset === 'function') {
+      applyPreset(state);
+    } else {
+      // Fallback: actualizar sliders directamente desde el mapa global
+      const sliderMap = window.LGMDM?.sliderIdToParam || {};
+      Object.entries(sliderMap).forEach(([sliderId, paramKey]) => {
+        if (state[paramKey] == null) return;
+        const sliderEl = document.getElementById(sliderId);
+        if (!sliderEl) return;
+        sliderEl.value = state[paramKey];
+        sliderEl.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    }
+    // Notificar al engine/visualizers para que se actualicen
+    window.dispatchEvent(new CustomEvent('mastering-state-applied', { detail: state }));
+  };
 })();

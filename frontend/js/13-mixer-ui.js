@@ -107,16 +107,26 @@
         startDb = getDb();
         document.body.style.userSelect = 'none';
         e.preventDefault();
+        _activeFader = {
+          applyDb, pxToDb, getTrackH,
+          get dragging() { return dragging; },
+          set dragging(v) { dragging = v; },
+          get startY() { return startY; }
+        };
       }
       function onMove(e) {
-        if (!dragging) return;
+        const f = _activeFader;
+        if (!f || !f.dragging) return;
         const cy = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-        const dy = startY - cy;
-        applyDb(pxToDb(dy, getTrackH()));
+        const dy = f.startY - cy;
+        f.applyDb(f.pxToDb(dy, f.getTrackH()));
       }
       function onUp() {
-        dragging = false;
+        const f = _activeFader;
+        if (!f) return;
+        f.dragging = false;
         document.body.style.userSelect = '';
+        _activeFader = null;
       }
 
       el.addEventListener('mousedown',  onDown);
@@ -184,8 +194,10 @@
 
   function initTemplates() {
     if (!_channelTemplate) {
-      _channelTemplate = document.createElement('template');
-      _channelTemplate.id = 'tmpl-channel';
+      _channelTemplate = document.getElementById('tmpl-channel');
+      if (!_channelTemplate) {
+        _channelTemplate = document.createElement('template');
+        _channelTemplate.id = 'tmpl-channel';
       _channelTemplate.innerHTML = `
         <div class="mxr-channel" data-stem="">
           <div class="mxr-ch-header">
@@ -193,7 +205,7 @@
             <span class="mxr-ch-name"></span>
             <button class="mxr-ch-close" data-stem="">✕</button>
           </div>
-          <div class="lgjs-s-6b99de8b">⏳ Subiendo…</div>
+          <div class="mxr-ch-uploading">⏳ Subiendo…</div>
           <div class="mxr-fader-area">
             <div class="mxr-db-scale">
               <span>+12</span><span>+6</span><span>0</span>
@@ -312,13 +324,16 @@
           </details>
         </div>
       `;
-      document.body.appendChild(_channelTemplate);
+        document.body.appendChild(_channelTemplate);
+      }
     }
 
     if (!_eqBandTemplate) {
-      _eqBandTemplate = document.createElement('template');
-      _eqBandTemplate.id = 'tmpl-eqband';
-      _eqBandTemplate.innerHTML = `
+      _eqBandTemplate = document.getElementById('tmpl-eqband');
+      if (!_eqBandTemplate) {
+        _eqBandTemplate = document.createElement('template');
+        _eqBandTemplate.id = 'tmpl-eqband';
+        _eqBandTemplate.innerHTML = `
         <div class="mxr-eqband">
           <div class="mxr-eqband-label"></div>
           <div class="mxr-eqband-row">
@@ -338,7 +353,8 @@
           </div>
         </div>
       `;
-      document.body.appendChild(_eqBandTemplate);
+        document.body.appendChild(_eqBandTemplate);
+      }
     }
   }
 
@@ -1499,7 +1515,7 @@ function requireChannelChild(parent, selector, owner) {
           if (fill && m.peak_db != null) {
             const pct = Math.max(0, Math.min(100, (m.peak_db + 60) / 60 * 100));
             fill.style.height = pct + '%';
-            fill.style.background = m.peak_db > -3 ? 'var(--clip-red)' : m.peak_db > -12 ? 'var(--amber)' : 'var(--vu-green)';
+            fill.style.background = m.peak_db > -3 ? 'var(--ui-danger)' : m.peak_db > -12 ? 'var(--ui-warn)' : 'var(--ui-good)';
           }
         });
       }

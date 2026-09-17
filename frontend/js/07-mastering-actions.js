@@ -374,16 +374,17 @@ function renderStemsPanel(stemAnalysis, jobId, availableStems) {
   const wrap = document.createElement("div");
   wrap.className = "stems-wrap";
 
+  const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
   const cards = Object.values(stemAnalysis.stems || {})
     .map(
       (s) => `
   <div class="stem-card ${s.is_silent ? "silent" : ""}">
-    <div class="stem-title">${s.label || s.name}</div>
+    <div class="stem-title">${esc(s.label || s.name)}</div>
     <div class="stem-metric"><span>Peak</span><span>${s.peak_db} dB</span></div>
     <div class="stem-metric"><span>RMS</span><span>${s.rms_db} dB</span></div>
     ${s.lufs != null ? `<div class="stem-metric"><span>LUFS</span><span>${s.lufs}</span></div>` : ""}
-    <div class="stem-metric"><span>Banda dominante</span><span>${(s.dominant_band || "—").replace("_", " ")}</span></div>
-    ${availableStems.includes(s.name) ? `<button type="button" class="stem-dl" data-stem-download="${jobId}" data-stem-name="${s.name}">⬇ Descargar ${s.name}.wav</button>` : ""}
+    <div class="stem-metric"><span>Banda dominante</span><span>${esc((s.dominant_band || "—").replace("_", " "))}</span></div>
+    ${availableStems.includes(s.name) ? `<button type="button" class="stem-dl" data-stem-download="${esc(jobId)}" data-stem-name="${esc(s.name)}">⬇ Descargar ${esc(s.name)}.wav</button>` : ""}
   </div>
 `,
     )
@@ -395,13 +396,13 @@ function renderStemsPanel(stemAnalysis, jobId, availableStems) {
         .map(
           (r) => `
       <div class="stem-rec ${r.type === "kick_bass_collision" ? "kick-bass" : ""}">
-        ${r.message}
-        <div class="rec-score">Score de colisión: ${r.score}${r.band_hz ? ` · Banda: ${r.band_hz[0]}-${r.band_hz[1]} Hz` : ""}</div>
+        ${esc(r.message)}
+        <div class="rec-score">Score de colisión: ${esc(r.score)}${r.band_hz ? ` · Banda: ${esc(r.band_hz[0])}-${esc(r.band_hz[1])} Hz` : ""}</div>
       </div>
     `,
         )
         .join("")
-    : `<div class="stem-summary">${stemAnalysis.summary || "Sin colisiones detectadas."}</div>`;
+    : `<div class="stem-summary">${esc(stemAnalysis.summary) || "Sin colisiones detectadas."}</div>`;
 
   const isRoformer = Object.keys(stemAnalysis.stems || {}).includes("instrumental");
   wrap.innerHTML = `

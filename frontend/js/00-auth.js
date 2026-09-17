@@ -42,45 +42,22 @@
   // La autenticación de transporte vive en 00-api.js (apiFetch/authHeaders).
   // ── UI ────────────────────────────────────────────────────────────────────
 
-  function renderAuthOverlay() {
-    // index.html ya aporta el contenedor canónico; reutilizarlo evita IDs
-    // duplicados y garantiza que el CSS #auth-overlay gobierne el login.
-    const div = document.getElementById('auth-overlay') || document.createElement('div');
-    div.id = 'auth-overlay';
-    div.classList.remove('hidden');
-    div.innerHTML = `
-      <div class="auth-box">
-        <div class="auth-logo">🎚 MASTER Studio</div>
-        <div class="auth-tabs">
-          <button class="auth-tab active" id="tab-login">Iniciar sesión</button>
-          <button class="auth-tab" id="tab-register">Registrarse</button>
-        </div>
-
-        <!-- Login -->
-        <div id="form-login" class="auth-form">
-          <input type="email" id="login-email" placeholder="Email" autocomplete="email">
-          <input type="password" id="login-pwd" placeholder="Contraseña" autocomplete="current-password">
-          <button class="auth-submit" id="login-btn">Ingresar</button>
-          <div id="login-msg" class="auth-msg lgjs-hidden"></div>
-        </div>
-
-        <!-- Registro -->
-        <div id="form-register" class="auth-form lgjs-hidden">
-          <input type="text" id="reg-name" placeholder="Nombre completo">
-          <input type="email" id="reg-email" placeholder="Email" autocomplete="email">
-          <input type="password" id="reg-pwd" placeholder="Contraseña (mín. 8 caracteres)" autocomplete="new-password">
-          <button class="auth-submit" id="register-btn">Crear cuenta</button>
-          <div id="reg-msg" class="auth-msg lgjs-hidden"></div>
-        </div>
-      </div>
-    `;
-    if (!div.parentNode) document.body.appendChild(div);
-    bindAuthEvents();
+  function hideAuthOverlay() {
+    const overlay = document.getElementById('auth-overlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
+    }
   }
 
   function renderUserBar(user) {
-    const bar = document.createElement('div');
-    bar.id = 'auth-user-bar';
+    let bar = document.getElementById('auth-user-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'auth-user-bar';
+    } else {
+      bar.innerHTML = '';
+    }
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'auth-user-name';
@@ -92,45 +69,92 @@
     logoutBtn.type = 'button';
     logoutBtn.textContent = 'Cerrar sesión';
 
-    bar.append(nameSpan, logoutBtn);
-    // Se inserta DENTRO del <header> (junto al botón DEV) en vez de flotar
-    // porque ambos ocupaban la esquina superior derecha al mismo tiempo.
+    bar.appendChild(nameSpan);
+
+    if (user?.role === 'admin') {
+      const adminBtn = document.createElement('button');
+      adminBtn.id = 'admin-panel-btn';
+      adminBtn.className = 'auth-admin-btn';
+      adminBtn.type = 'button';
+      adminBtn.textContent = '⚙ Admin';
+      adminBtn.title = 'Panel de administración de usuarios';
+      adminBtn.addEventListener('click', openAdminPanel);
+      bar.appendChild(adminBtn);
+    }
+
+    bar.appendChild(logoutBtn);
+
+    const headerRight = document.querySelector('.header-right');
     const headerEl = document.querySelector('header');
-    (headerEl || document.body).appendChild(bar);
+    if (headerRight && !headerRight.contains(bar)) {
+      headerRight.appendChild(bar);
+    } else if (headerEl && !headerEl.contains(bar)) {
+      headerEl.appendChild(bar);
+    } else if (!document.body.contains(bar)) {
+      document.body.appendChild(bar);
+    }
 
     const bindOnce = window.LGMDM.ui.bindOnce;
     bindOnce(logoutBtn, 'click', () => {
       clearSession();
-      location.reload();
+      window.location.replace('login.html');
     }, 'auth-userbar-logout');
   }
 
   function renderAdminButton() {
-    const btn = document.createElement('button');
-    btn.id = 'admin-panel-btn';
-    btn.textContent = '⚙ Admin';
-    document.body.appendChild(btn);
-    btn.addEventListener('click', openAdminPanel);
+    let btn = document.getElementById('admin-panel-btn');
+    if (!btn) {
+      const userBar = document.getElementById('auth-user-bar');
+      if (userBar) {
+        btn = document.createElement('button');
+        btn.id = 'admin-panel-btn';
+        btn.className = 'auth-admin-btn';
+        btn.type = 'button';
+        btn.textContent = '⚙ Admin';
+        btn.title = 'Panel de administración de usuarios';
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) userBar.insertBefore(btn, logoutBtn);
+        else userBar.appendChild(btn);
+      }
+    }
+    if (btn && !btn.dataset.wired) {
+      btn.dataset.wired = 'true';
+      btn.addEventListener('click', openAdminPanel);
+    }
   }
 
   async function openAdminPanel() {
     let overlay = document.getElementById('admin-overlay');
-    if (overlay) { overlay.classList.remove('hidden'); loadAdminUsers(); return; }
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
+      loadAdminUsers();
+      return;
+    }
 
     overlay = document.createElement('div');
     overlay.id = 'admin-overlay';
+    overlay.style.display = 'flex';
     overlay.innerHTML = `
       <div class="admin-box">
         <div class="admin-title">
           <span>⚙ Panel de administración</span>
-          <button class="admin-close" id="admin-close-btn">✕</button>
+          <button class="admin-close" id="admin-close-btn" type="button" aria-label="Cerrar panel">✕</button>
         </div>
         <div id="admin-users-list">Cargando…</div>
       </div>
     `;
     document.body.appendChild(overlay);
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); });
-    document.getElementById('admin-close-btn')?.addEventListener('click', () => overlay.classList.add('hidden'));
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
+      }
+    });
+    document.getElementById('admin-close-btn')?.addEventListener('click', () => {
+      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
+    });
     loadAdminUsers();
   }
 
@@ -210,17 +234,29 @@
 
   function bindAuthEvents() {
     // Tabs
-    document.getElementById('tab-login')?.addEventListener('click', () => {
-      document.getElementById('form-login').classList.remove('lgjs-hidden');
-      document.getElementById('form-register').classList.add('lgjs-hidden');
-      document.getElementById('tab-login').classList.add('active');
-      document.getElementById('tab-register').classList.remove('active');
+    const tabLogin = document.getElementById('tab-login');
+    const tabReg = document.getElementById('tab-register');
+    const formLogin = document.getElementById('form-login');
+    const formReg = document.getElementById('form-register');
+
+    tabLogin?.addEventListener('click', () => {
+      formLogin?.classList.remove('lgjs-hidden');
+      formReg?.classList.add('lgjs-hidden');
+      tabLogin.classList.add('active');
+      tabLogin.setAttribute('aria-selected', 'true');
+      tabReg?.classList.remove('active');
+      tabReg?.setAttribute('aria-selected', 'false');
+      document.getElementById('login-email')?.focus();
     });
-    document.getElementById('tab-register')?.addEventListener('click', () => {
-      document.getElementById('form-login').classList.add('lgjs-hidden');
-      document.getElementById('form-register').classList.remove('lgjs-hidden');
-      document.getElementById('tab-login').classList.remove('active');
-      document.getElementById('tab-register').classList.add('active');
+
+    tabReg?.addEventListener('click', () => {
+      formLogin?.classList.add('lgjs-hidden');
+      formReg?.classList.remove('lgjs-hidden');
+      tabLogin?.classList.remove('active');
+      tabLogin?.setAttribute('aria-selected', 'false');
+      tabReg.classList.add('active');
+      tabReg.setAttribute('aria-selected', 'true');
+      document.getElementById('reg-name')?.focus();
     });
 
     // Login
@@ -230,6 +266,7 @@
       const pwd   = document.getElementById('login-pwd')?.value;
       if (!email || !pwd) { showMsg('login-msg', 'Completá todos los campos', 'error'); return; }
       loginBtn.disabled = true;
+      loginBtn.textContent = 'Ingresando…';
       try {
         const res = await LGMDM.api.apiFetch('/auth/login', {
           method: 'POST',
@@ -242,23 +279,40 @@
         }
         const data = await res.json();
         saveSession(data.access_token, data.user);
-        document.getElementById('auth-overlay').classList.add('hidden');
+        hideAuthOverlay();
         onAuthenticated(data.user);
       } catch (err) {
         showMsg('login-msg', err.message, 'error');
-      } finally { loginBtn.disabled = false; }
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Ingresar';
+      }
     }
     loginBtn?.addEventListener('click', doLogin);
-    document.getElementById('login-pwd')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    // Soporte Enter en inputs de login
+    const loginEmail = document.getElementById('login-email');
+    const loginPwd   = document.getElementById('login-pwd');
+    loginEmail?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (!loginPwd?.value) {
+          loginPwd?.focus();
+        } else {
+          doLogin();
+        }
+      }
+    });
+    loginPwd?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
     // Registro
     const regBtn = document.getElementById('register-btn');
-    regBtn?.addEventListener('click', async () => {
+    async function doRegister() {
       const name  = document.getElementById('reg-name')?.value?.trim();
       const email = document.getElementById('reg-email')?.value?.trim();
       const pwd   = document.getElementById('reg-pwd')?.value;
       if (!email || !pwd) { showMsg('reg-msg', 'Completá todos los campos', 'error'); return; }
       regBtn.disabled = true;
+      regBtn.textContent = 'Creando cuenta…';
       try {
         const res = await LGMDM.api.apiFetch('/auth/register', {
           method: 'POST',
@@ -271,12 +325,30 @@
         }
         const data = await res.json();
         showMsg('reg-msg', '✓ Cuenta creada. Esperá la aprobación del administrador.', 'success');
-        document.getElementById('reg-name').value = '';
-        document.getElementById('reg-email').value = '';
-        document.getElementById('reg-pwd').value = '';
+        const regNameEl = document.getElementById('reg-name');
+        const regEmailEl = document.getElementById('reg-email');
+        const regPwdEl = document.getElementById('reg-pwd');
+        if (regNameEl) regNameEl.value = '';
+        if (regEmailEl) regEmailEl.value = '';
+        if (regPwdEl) regPwdEl.value = '';
       } catch (err) {
         showMsg('reg-msg', err.message, 'error');
-      } finally { regBtn.disabled = false; }
+      } finally {
+        regBtn.disabled = false;
+        regBtn.textContent = 'Crear cuenta';
+      }
+    }
+    regBtn?.addEventListener('click', doRegister);
+
+    // Soporte Enter en inputs de registro
+    document.getElementById('reg-name')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('reg-email')?.focus();
+    });
+    document.getElementById('reg-email')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('reg-pwd')?.focus();
+    });
+    document.getElementById('reg-pwd')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doRegister();
     });
   }
 
@@ -289,16 +361,16 @@
   // ── Init ──────────────────────────────────────────────────────────────────
 
   function init() {
-    // El login debe ser visible de inmediato. Nunca dejamos la aplicación
-    // en una pantalla vacía mientras se valida una sesión anterior.
-    renderAuthOverlay();
-
     const token = getToken();
     const user  = getUser();
 
-    if (!token || !user) return;
+    // Si no hay sesión válida, redirigir inmediatamente a la página de login
+    if (!token || !user) {
+      window.location.replace('login.html');
+      return;
+    }
 
-    // Validar una sesión previa sin bloquear visualmente el arranque.
+    // Validar sesión previa con el backend
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 4000);
 
@@ -306,16 +378,15 @@
       .then(async res => {
         if (res.ok) {
           onAuthenticated(user);
-          document.getElementById('auth-overlay')?.classList.add('hidden');
+          hideAuthOverlay();
           return;
         }
         clearSession();
+        window.location.replace('login.html');
       })
       .catch(() => {
-        // Backend caído/lento: la pantalla de login ya está visible.
-        // Se limpia la sesión vieja para evitar que el siguiente arranque
-        // vuelva a quedar esperando una validación imposible.
         clearSession();
+        window.location.replace('login.html');
       })
       .finally(() => window.clearTimeout(timeoutId));
   }

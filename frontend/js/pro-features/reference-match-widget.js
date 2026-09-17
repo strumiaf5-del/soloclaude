@@ -35,21 +35,11 @@
   const DMIN = -24;
   const DMAX = 24;
 
-  function logFreq(f) { return Math.log10(Math.max(1, f)); }
   const LOG_FMIN = logFreq(FMIN);
   const LOG_FMAX = logFreq(FMAX);
-  function xFromFreq(f, left, width) {
-    const t = (logFreq(f) - LOG_FMIN) / (LOG_FMAX - LOG_FMIN);
-    return left + t * width;
-  }
-  function yFromDb(db, top, height) {
-    const t = (db - DMIN) / (DMAX - DMIN);
-    return top + (1 - t) * height;
-  }
-  function freqFromX(x, left, width) {
-    const t = (x - left) / width;
-    return Math.pow(10, LOG_FMIN + t * (LOG_FMAX - LOG_FMIN));
-  }
+  function xFromFreq(f, left, width) { return window.xFromFreq(f, left, width, LOG_FMIN, LOG_FMAX); }
+  function yFromDb(db, top, height) { return window.yFromDb(db, top, height, DMIN, DMAX); }
+  function freqFromX(x, left, width) { return window.freqFromX(x, left, width, LOG_FMIN, LOG_FMAX); }
 
   class Widget {
     constructor() {
@@ -331,6 +321,58 @@
     }
   }
 
+  // ── Backend devuelve `applied_eq_bands` en header `X-Reference-Match` ──
+  Widget.parseReferenceMatchHeader = function (res) {
+    const header = res.headers.get('X-Reference-Match') || res.headers.get('x-reference-match');
+    if (!header) return [];
+    try {
+      const arr = JSON.parse(header);
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) {
+      return header.split(',').map(s => {
+        const [freq, gain] = s.split(':').map(Number);
+        return { freq, gain_db: gain };
+      });
+    }
+  };
+
+  Widget.fetchMatch = async function (targetFile, referenceFile, opts = {}) {
+    const fd = new FormData();
+    fd.append('target_file', targetFile);
+    fd.append('reference_file', referenceFile);
+    if (Number.isFinite(opts.match_amount)) fd.append('match_amount', String(opts.match_amount));
+    if (Number.isFinite(opts.smoothing)) fd.append('smoothing', String(opts.smoothing));
+    const token = opts.token || '';
+    const res = await fetch('/dsp/match-eq', {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: fd
+    });
+    const blob = await res.blob();
+    const applied_eq_bands = Widget.parseReferenceMatchHeader(res);
+    return { blob, applied_eq_bands };
+  };
+
   NS.proFeatures.referenceMatchWidget = Widget;
   if (typeof module !== 'undefined' && module.exports) module.exports = { Widget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Mapea al CATALOG key 'match-eq'. `Widget.fetchMatch(...)` parsea el
+  // header `X-Reference-Match` para extraer EQ bands aplicadas.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['match-eq']) {
+      const inst = rack.create({
+        id: 'match-eq', title: '🎚 Reference Match', endpoint: '/dsp/match-eq', widget: Widget
+      });
+      if (inst) {
+        Widget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['match-eq'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'reference-match', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

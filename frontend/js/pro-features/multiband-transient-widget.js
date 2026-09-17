@@ -26,13 +26,7 @@
     return Math.max(-100, Math.min(100, n));
   }
 
-  function clamp01(n) {
-    n = Number(n);
-    if (!Number.isFinite(n)) return 0;
-    return Math.max(0, Math.min(1, n));
-  }
-
-  class MultibandTransientWidget {
+  class multibandTransientWidget {
     constructor() {
       this.canvas = null;
       this.root = null;
@@ -153,10 +147,10 @@
                       border:1px solid rgba(255,255,255,.06);">
             <div style="display:flex;justify-content:space-between;align-items:baseline;">
               <strong style="font-size:.72rem;letter-spacing:.06em;color:#dcfbff;">${label}</strong>
-              <span style="font-size:.6rem;color:var(--muted,#9ba6c4);text-transform:uppercase;">band ${i + 1}</span>
+              <span style="font-size:.6rem;color:var(--ui-muted,#9ba6c4);text-transform:uppercase;">band ${i + 1}</span>
             </div>
             <div>
-              <label style="display:block;font-size:.62rem;color:var(--muted,#9ba6c4);
+              <label style="display:block;font-size:.62rem;color:var(--ui-muted,#9ba6c4);
                             text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">
                 Attack
               </label>
@@ -169,7 +163,7 @@
               </output>
             </div>
             <div>
-              <label style="display:block;font-size:.62rem;color:var(--muted,#9ba6c4);
+              <label style="display:block;font-size:.62rem;color:var(--ui-muted,#9ba6c4);
                             text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">
                 Release
               </label>
@@ -205,7 +199,7 @@
             <strong class="pro-card-title" style="font-size:.78rem;">
               ⚡ Multiband Transient Designer
             </strong>
-            <span style="font-size:.6rem;color:var(--muted,#9ba6c4);">
+            <span style="font-size:.6rem;color:var(--ui-muted,#9ba6c4);">
               Per-band envelope shaping · 3 bandas
             </span>
           </div>
@@ -217,7 +211,7 @@
 
           <div class="pro-control-row" style="display:grid;grid-template-columns:140px 1fr 90px;
                                               align-items:center;gap:.8rem;margin:.4rem 0 0;">
-            <label style="font-size:.72rem;color:var(--muted,#9ba6c4);">Amount</label>
+            <label style="font-size:.72rem;color:var(--ui-muted,#9ba6c4);">Amount</label>
             <input type="range" id="mtwAmount" min="0" max="100" step="1" value="${amountPct}"
                    style="width:100%;">
             <output id="mtwAmountVal"
@@ -382,6 +376,13 @@
         for (let i = 0; i < 3; i++) {
           this.levels[i] = Math.max(0, this.levels[i] * 0.93 - 0.005);
         }
+        // FIX CRÍTICO — Detener RAF cuando todos los levels cayeron a ~0
+        // (después de ~2s de decay sin update, idle a 60fps para siempre).
+        // update() lo reactiva automáticamente seteando levels[i] > 0.
+        if (this.levels.every((v) => v < 0.01)) {
+          this._renderLedSnapshot();
+          return;
+        }
         this._renderLedSnapshot();
         this.rafId = requestAnimationFrame(tick);
       };
@@ -389,7 +390,26 @@
     }
   }
 
-  LG.proFeatures.MultibandTransientWidget = MultibandTransientWidget;
-  // Exposición también en global para tests / inspección
-  global.MultibandTransientWidget = MultibandTransientWidget;
+  LG.proFeatures.multibandTransientWidget = multibandTransientWidget;
+  if (typeof module !== 'undefined' && module.exports) module.exports = { multibandTransientWidget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Frontend-only: attack/release por banda + amount, sin /dsp/* directo.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['multiband-transient']) {
+      const inst = rack.create({
+        id: 'multiband-transient', title: '🥁 Multiband Transient', widget: multibandTransientWidget
+      });
+      if (inst) {
+        multibandTransientWidget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['multiband-transient'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'multiband-transient', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);
+

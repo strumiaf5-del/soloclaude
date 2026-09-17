@@ -221,9 +221,6 @@
     console.log(`🎨 LGMDM theme initialized: ${currentTheme}`);
   }
 
-  const publicApi = { init, applyTheme, toggleDarkMode, currentTheme: () => currentTheme, themes: THEMES };
-  LGMDM.themeManager = publicApi;
-
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
   else init();
 })(window);

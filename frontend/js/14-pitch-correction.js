@@ -1,166 +1,250 @@
 // ============================================================
 // 14-pitch-correction.js — Pitch Correction UI
-// Interfaz para aplicar corrección automática de pitch
+// Interfaz modal centrada para corrección automática de pitch
 // ============================================================
 
 (function () {
+  'use strict';
+
+  const OVERLAY_ID = 'pitchCorrectionOverlay';
   const PC_PANEL_ID = 'pitchCorrectionPanel';
   const PC_MODES = ['OFF', 'LIGHT', 'MEDIUM', 'STRONG'];
+  let _escListenerWired = false;
 
-
-  function createPitchCorrectionPanel() {
+  function createPitchCorrectionOverlay() {
     return `
-      <div id="${PC_PANEL_ID}" class="lgjs-s-3065b8f6">
-        <div class="lgjs-s-70c54dae">
-          <h3 class="lgjs-s-11696618">🎵 Pitch Correction</h3>
-          <button id="pitchCorrectionClose" class="lgjs-s-db626d22">✕</button>
-        </div>
-
-        <div class="lgjs-s-363cdaa2">
-          <label class="lgjs-s-a4c301cf">📄 Input (File/Library)</label>
-          <input type="file" id="pitchCorrectionFile" accept="audio/*" class="lgjs-s-2adc874c">
-          <div class="lgjs-s-3fcfadef">o seleccionar de librería de stems</div>
-          <select id="pitchCorrectionLibrary" class="lgjs-s-ca90bd64">
-            <option value="">— No seleccionada —</option>
-          </select>
-        </div>
-
-        <div class="lgjs-s-363cdaa2">
-          <label class="lgjs-s-a4c301cf">Mode</label>
-          <div class="lgjs-s-de2ef6e2">
-            ${PC_MODES.map(m => `
-              <button class="pc-mode-btn${m==='MEDIUM'?' lgjs-s-65dc0d12':''}" data-mode="${m}" style="padding:.5rem;background:var(--surface2);border:2px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-weight:${m==='MEDIUM'?'bold':'normal'};transition:all 200ms">
-                ${m}
-              </button>
-            `).join('')}
+      <div id="${OVERLAY_ID}" class="lgmdm-modal-overlay" style="display:none; position:fixed; inset:0; z-index:var(--z-modal, 12000); background:rgba(8,11,20,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:1rem; box-sizing:border-box;">
+        <div id="${PC_PANEL_ID}" class="admin-box" style="width:min(520px, 94vw); max-height:88vh; overflow-y:auto; background:linear-gradient(145deg, #111625, #191c32); border:1px solid rgba(125,232,255,0.25); border-radius:18px; padding:1.5rem; box-shadow:0 24px 60px rgba(0,0,0,0.6); box-sizing:border-box; color:var(--ui-text, #f1f5f9);">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-size:1.2rem;">🎵</span>
+              <h3 style="margin:0; font-size:1.1rem; font-weight:700; color:var(--ui-text, #f1f5f9);">Pitch Correction</h3>
+            </div>
+            <button id="pitchCorrectionClose" type="button" aria-label="Cerrar modal" style="width:30px; height:30px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); color:var(--ui-muted, #94a3b8); cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all 0.18s;">✕</button>
           </div>
-          <div class="lgjs-s-3fcfadef">
-            OFF=desactivado | LIGHT=±20¢ | MEDIUM=±50¢ | STRONG=±100¢
+
+          <!-- Input File / Library -->
+          <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--ui-muted, #94a3b8); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem;">Audio Input</label>
+            <div id="pitchCorrectionCurrentFileNotice" style="font-size:0.8rem; color:var(--ui-accent, #52f2bd); margin-bottom:0.4rem;">Pista actual en consola</div>
+            <input type="file" id="pitchCorrectionFile" accept="audio/*" style="display:block; width:100%; box-sizing:border-box; font-size:0.8rem; padding:0.4rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--ui-text, #f1f5f9);">
+            <div style="font-size:0.72rem; color:var(--ui-muted, #94a3b8); margin:0.4rem 0 0.25rem;">O seleccionar de biblioteca de stems:</div>
+            <select id="pitchCorrectionLibrary" style="width:100%; box-sizing:border-box; padding:0.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--ui-text, #f1f5f9); font-size:0.82rem;">
+              <option value="">— No seleccionada —</option>
+            </select>
           </div>
-        </div>
 
-        <div class="lgjs-s-363cdaa2">
-          <label class="lgjs-s-a4c301cf">Tonalidad (Scale)</label>
-          <select id="pitchCorrectionScale" class="lgjs-s-2adc874c">
-            <option value="">— Auto-detect —</option>
-            <option value="C_major">C Major</option>
-            <option value="G_major">G Major</option>
-            <option value="D_major">D Major</option>
-            <option value="A_major">A Major</option>
-            <option value="E_major">E Major</option>
-            <option value="F_major">F Major</option>
-            <option value="A_minor">A Minor</option>
-            <option value="E_minor">E Minor</option>
-            <option value="D_minor">D Minor</option>
-          </select>
-        </div>
-
-        <div class="lgjs-s-363cdaa2">
-          <label class="lgjs-s-a4c301cf">Glide Time (ms)</label>
-          <input type="range" id="pitchCorrectionGlide" min="0" max="200" value="50" class="lgjs-s-0466783d">
-          <div class="lgjs-s-bec2fe95">
-            <span>0ms</span>
-            <span id="pitchCorrectionGlideVal">50ms</span>
-            <span>200ms</span>
+          <!-- Mode buttons -->
+          <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--ui-muted, #94a3b8); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem;">Intensidad de Corrección (Mode)</label>
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.4rem;" id="pitchModeGroup">
+              ${PC_MODES.map(m => `
+                <button type="button" class="pc-mode-btn" data-mode="${m}" ${m === 'MEDIUM' ? 'data-selected="true"' : ''} style="padding:0.5rem; background:${m === 'MEDIUM' ? 'rgba(92,232,255,0.15)' : 'rgba(255,255,255,0.04)'}; border:2px solid ${m === 'MEDIUM' ? 'var(--ui-accent, #42e8ff)' : 'rgba(255,255,255,0.1)'}; border-radius:8px; color:${m === 'MEDIUM' ? '#fff' : 'var(--ui-muted, #94a3b8)'}; cursor:pointer; font-weight:700; font-size:0.78rem; transition:all 0.18s;">
+                  ${m}
+                </button>
+              `).join('')}
+            </div>
+            <div style="font-size:0.7rem; color:var(--ui-muted, #94a3b8); margin-top:0.35rem;">
+              OFF=desactivado · LIGHT=±20¢ · MEDIUM=±50¢ · STRONG=±100¢
+            </div>
           </div>
-        </div>
 
-        <div class="lgjs-s-363cdaa2">
-          <label class="lgjs-s-a4c301cf">Output Format</label>
-          <select id="pitchCorrectionFormat" class="lgjs-s-2adc874c">
-            <option value="wav">WAV (24-bit)</option>
-            <option value="flac">FLAC</option>
-            <option value="mp3">MP3 (320kbps)</option>
-          </select>
-        </div>
+          <!-- Scale selector -->
+          <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--ui-muted, #94a3b8); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem;">Escala / Tonalidad</label>
+            <select id="pitchCorrectionScale" style="width:100%; box-sizing:border-box; padding:0.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--ui-text, #f1f5f9); font-size:0.82rem;">
+              <option value="">— Auto-detect —</option>
+              <option value="C_major">C Major</option>
+              <option value="G_major">G Major</option>
+              <option value="D_major">D Major</option>
+              <option value="A_major">A Major</option>
+              <option value="E_major">E Major</option>
+              <option value="F_major">F Major</option>
+              <option value="A_minor">A Minor</option>
+              <option value="E_minor">E Minor</option>
+              <option value="D_minor">D Minor</option>
+            </select>
+          </div>
 
-        <div class="lgjs-s-363cdaa2">
-          <button id="pitchCorrectionApply" class="lgjs-s-6058516f">
+          <!-- Glide range -->
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <label style="font-size:0.78rem; font-weight:700; color:var(--ui-muted, #94a3b8); text-transform:uppercase; letter-spacing:0.06em;">Glide Time</label>
+              <span id="pitchCorrectionGlideVal" style="font-size:0.8rem; font-weight:700; color:var(--ui-accent, #42e8ff);">50ms</span>
+            </div>
+            <input type="range" id="pitchCorrectionGlide" min="0" max="200" value="50" style="width:100%;">
+            <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--ui-muted, #94a3b8); margin-top:0.2rem;">
+              <span>0ms (rápido)</span>
+              <span>200ms (suave)</span>
+            </div>
+          </div>
+
+          <!-- Format -->
+          <div style="margin-bottom:1.2rem;">
+            <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--ui-muted, #94a3b8); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem;">Formato de Salida</label>
+            <select id="pitchCorrectionFormat" style="width:100%; box-sizing:border-box; padding:0.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--ui-text, #f1f5f9); font-size:0.82rem;">
+              <option value="wav">WAV (24-bit PCM HQ)</option>
+              <option value="flac">FLAC</option>
+              <option value="mp3">MP3 (320kbps)</option>
+            </select>
+          </div>
+
+          <!-- Action Button -->
+          <button id="pitchCorrectionApply" type="button" style="width:100%; padding:0.75rem 1rem; border-radius:10px; border:1px solid rgba(92,232,255,0.35); background:linear-gradient(135deg, #42d9ff, #9b59ff); color:#071018; font-weight:800; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 16px rgba(66,217,255,0.25); transition:all 0.18s;">
             ✓ Aplicar Pitch Correction
           </button>
-        </div>
 
-        <div id="pitchCorrectionStatus" class="lgjs-s-b09c5975"></div>
+          <!-- Status & Progress -->
+          <div id="pitchCorrectionStatus" style="margin-top:0.8rem; font-size:0.82rem; text-align:center; min-height:1.2rem;"></div>
 
-        <div id="pitchCorrectionProgress" class="lgjs-s-6682d399">
-          <div class="lgjs-s-33de6e62">
-            <div id="pitchCorrectionProgressBar" class="lgjs-s-789146fb"></div>
+          <div id="pitchCorrectionProgress" style="display:none; margin-top:0.6rem;">
+            <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+              <div id="pitchCorrectionProgressBar" style="width:100%; height:100%; background:linear-gradient(90deg, #42d9ff, #52f2bd); animation:pcPulse 1.2s infinite ease-in-out;"></div>
+            </div>
+            <div style="font-size:0.72rem; color:var(--ui-muted, #94a3b8); text-align:center; margin-top:0.3rem;">Procesando en servidor...</div>
           </div>
-          <div class="lgjs-s-3fcfadef">Processing...</div>
         </div>
       </div>
     `;
   }
 
-  function showPitchCorrectionPanel() {
-    const panel = document.getElementById(PC_PANEL_ID);
-    if (!panel) return;
-
-    panel.style.display = 'block';
-    for (const id of [
-      'pitchCorrectionClose', 'pitchCorrectionLibrary', 'pitchCorrectionScale',
-      'pitchCorrectionGlide', 'pitchCorrectionGlideVal', 'pitchCorrectionFormat',
-      'pitchCorrectionApply', 'pitchCorrectionStatus', 'pitchCorrectionProgress',
-      'pitchCorrectionProgressBar'
-    ]) {
-      LGMDM.dom.requireById(id, '14-pitch-correction');
+  function ensureModalMounted() {
+    let overlay = document.getElementById(OVERLAY_ID);
+    if (!overlay) {
+      const container = document.createElement('div');
+      container.innerHTML = createPitchCorrectionOverlay();
+      overlay = container.firstElementChild;
+      document.body.appendChild(overlay);
+      wireModalEvents(overlay);
     }
+    return overlay;
+  }
 
-    // Cargar librería de stems
-    loadPitchCorrectionLibrary();
+  function wireModalEvents(overlay) {
+    const closeBtn = document.getElementById('pitchCorrectionClose');
+    closeBtn?.addEventListener('click', hidePitchCorrectionPanel);
 
-    // Listeners
-    document.getElementById('pitchCorrectionClose')?.addEventListener('click', () => {
-      panel.style.display = 'none';
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) hidePitchCorrectionPanel();
     });
 
-    document.querySelectorAll('.pc-mode-btn').forEach(btn => {
+    if (!_escListenerWired) {
+      _escListenerWired = true;
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.style.display === 'flex') {
+          hidePitchCorrectionPanel();
+        }
+      });
+    }
+
+    const modeBtns = overlay.querySelectorAll('.pc-mode-btn');
+    modeBtns.forEach(btn => {
       btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.pc-mode-btn').forEach(b => {
-          b.style.borderColor = 'var(--border)';
-          b.style.color = 'var(--text)';
+        modeBtns.forEach(b => {
+          b.style.borderColor = 'rgba(255,255,255,0.1)';
+          b.style.background = 'rgba(255,255,255,0.04)';
+          b.style.color = 'var(--ui-muted, #94a3b8)';
           delete b.dataset.selected;
         });
         const target = e.currentTarget;
-        target.style.borderColor = 'var(--amber)';
-        target.style.color = 'var(--amber)';
+        target.style.borderColor = 'var(--ui-accent, #42e8ff)';
+        target.style.background = 'rgba(92,232,255,0.15)';
+        target.style.color = '#fff';
         target.dataset.selected = 'true';
       });
     });
 
-    document.getElementById('pitchCorrectionGlide')?.addEventListener('input', (e) => {
-      LGMDM.dom.requireById('pitchCorrectionGlideVal', '14-pitch-correction:glide').textContent = e.target.value + 'ms';
+    const glideInput = document.getElementById('pitchCorrectionGlide');
+    glideInput?.addEventListener('input', (e) => {
+      const valEl = document.getElementById('pitchCorrectionGlideVal');
+      if (valEl) valEl.textContent = `${e.target.value}ms`;
     });
 
-    document.getElementById('pitchCorrectionApply')?.addEventListener('click', applyPitchCorrection);
+    const applyBtn = document.getElementById('pitchCorrectionApply');
+    applyBtn?.addEventListener('click', applyPitchCorrection);
+  }
+
+  async function populateStemLibrarySelect(selectEl) {
+    if (!selectEl) return;
+    LGMDM.api.apiFetch(`${LGMDM.api.apiBase()}/stems/library`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => {
+        const stems = data?.stems || [];
+        selectEl.innerHTML = '<option value="">— No seleccionada —</option>';
+        stems.forEach(stem => {
+          const opt = document.createElement('option');
+          opt.value = stem.id || stem.name;
+          opt.textContent = `${stem.name || stem.id} (${stem.track_name || 'track'})`;
+          selectEl.appendChild(opt);
+        });
+        if (stems.length > 0) {
+          selectEl.style.display = 'block';
+        }
+      })
+      .catch(e => console.warn('Librería de stems no disponible:', e));
+  }
+
+  function showPitchCorrectionPanel() {
+    const overlay = ensureModalMounted();
+    overlay.style.display = 'flex';
+
+    // Actualizar pista activa detectada
+    const curFile = window.LGMDM?.state?.selectedFile;
+    const noticeEl = document.getElementById('pitchCorrectionCurrentFileNotice');
+    if (noticeEl) {
+      noticeEl.textContent = curFile
+        ? `Pista activa: ${curFile.name}`
+        : 'Ningún archivo activo (seleccioná uno debajo o de la biblioteca)';
+    }
+
+    loadPitchCorrectionLibrary();
+  }
+
+  function hidePitchCorrectionPanel() {
+    const overlay = document.getElementById(OVERLAY_ID);
+    if (overlay) overlay.style.display = 'none';
   }
 
   function loadPitchCorrectionLibrary() {
     const select = document.getElementById('pitchCorrectionLibrary');
     if (!select) return;
 
-    const api = LGMDM.api.apiBase();
+    const apiBase = (typeof LGMDM !== 'undefined' && LGMDM.api && typeof LGMDM.api.apiBase === 'function')
+      ? LGMDM.api.apiBase()
+      : 'http://127.0.0.1:8000';
 
-    LGMDM.api.apiFetch(`${api}/library`)
+    LGMDM.api.apiFetch(`${apiBase}/library`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then(data => {
         if (Array.isArray(data.files)) {
+          const esc = (v) => (window.LGMDM?.ui?.escapeHtml || String)(v ?? '');
           select.innerHTML = '<option value="">— No seleccionada —</option>' +
-            data.files.slice(0, 20).map(item => 
-              `<option value="${item.id}">${item.original_filename}</option>`
-            ).join('');
+            data.files.slice(0, 30).map(item => {
+              const id = esc(item.id);
+              const name = esc(item.original_filename || item.filename || '');
+              return `<option value="${id}">${name}</option>`;
+            }).join('');
         }
       })
-      .catch(e => console.error('Error loading library:', e));
+      .catch(e => console.warn('Librería de stems no disponible:', e));
   }
 
   async function applyPitchCorrection() {
-    LGMDM.ui.showStatus('pitchCorrectionStatus', '⏳ Iniciando...', 'info');
+    const statusEl = document.getElementById('pitchCorrectionStatus');
+    const progEl = document.getElementById('pitchCorrectionProgress');
+    const applyBtn = document.getElementById('pitchCorrectionApply');
 
-    const file = document.getElementById('pitchCorrectionFile')?.files[0];
+    if (statusEl) {
+      statusEl.textContent = '⏳ Iniciando corrección de pitch...';
+      statusEl.style.color = 'var(--ui-accent, #42e8ff)';
+    }
+
+    const pickedFile = document.getElementById('pitchCorrectionFile')?.files[0];
+    const file = pickedFile || (window.LGMDM?.state?.selectedFile ?? null);
     const libraryId = document.getElementById('pitchCorrectionLibrary')?.value;
     const mode = document.querySelector('.pc-mode-btn[data-selected="true"]')?.dataset.mode || 'MEDIUM';
     const scale = document.getElementById('pitchCorrectionScale')?.value || null;
@@ -168,7 +252,10 @@
     const format = document.getElementById('pitchCorrectionFormat')?.value || 'wav';
 
     if (!file && !libraryId) {
-      LGMDM.ui.showStatus('pitchCorrectionStatus', '❌ Selecciona archivo o biblioteca', 'error');
+      if (statusEl) {
+        statusEl.textContent = '❌ Seleccioná un archivo de audio o stem de la biblioteca';
+        statusEl.style.color = 'var(--ui-danger, #ff6b81)';
+      }
       return;
     }
 
@@ -177,67 +264,82 @@
     if (libraryId) formData.append('library_id', libraryId);
     formData.append('mode', mode);
     if (scale) formData.append('scale', scale);
-    formData.append('glide_time_ms', glideTime);
+    formData.append('glide_time_ms', String(glideTime));
     formData.append('output_format', format);
 
-    const token = LGMDM.api.authToken();
-    const api = LGMDM.api.apiBase();
+    const token = (typeof LGMDM !== 'undefined' && LGMDM.api && typeof LGMDM.api.authToken === 'function')
+      ? LGMDM.api.authToken()
+      : (sessionStorage.getItem('master_auth_token') || '');
+    const apiBase = (typeof LGMDM !== 'undefined' && LGMDM.api && typeof LGMDM.api.apiBase === 'function')
+      ? LGMDM.api.apiBase()
+      : 'http://127.0.0.1:8000';
 
     try {
-      LGMDM.ui.showStatus('pitchCorrectionStatus', '⏳ Procesando pitch correction...', 'info');
-      LGMDM.dom.requireById('pitchCorrectionProgress', '14-pitch-correction:progress').style.display = 'block';
+      if (applyBtn) applyBtn.disabled = true;
+      if (progEl) progEl.style.display = 'block';
 
-      const response = await LGMDM.api.apiFetch(`${api}/pitch-correct`, {
+      const response = await fetch(`${apiBase}/pitch-correct`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.detail || 'Error desconocido');
+        let errText = '';
+        try {
+          const errData = await response.json();
+          errText = errData.detail || errData.message;
+        } catch (_) {
+          errText = await response.text();
+        }
+        throw new Error(errText || `HTTP ${response.status}`);
       }
 
-      // Extraer metadata del header
-      const detectedKey = response.headers.get('X-Detected-Key') || 'desconocida';
-      const confidence = parseFloat(response.headers.get('X-Confidence') || 0);
+      const detectedKey = response.headers.get('X-Detected-Key') || 'Auto';
+      const confidence = parseFloat(response.headers.get('X-Confidence') || '0');
 
-      // Descargar resultado
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `corrected.${format}`;
+      a.download = `pitch_corrected_${file ? (file.name || 'audio').replace(/\.[^.]+$/, '') : 'track'}.${format}`;
+      document.body.appendChild(a);
       a.click();
+      a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1500);
 
-      LGMDM.ui.showStatus('pitchCorrectionStatus', `✓ Completado: tonalidad=${detectedKey} (conf=${(confidence*100).toFixed(0)}%)`, 'success');
-      LGMDM.dom.requireById('pitchCorrectionProgress', '14-pitch-correction:progress').style.display = 'none';
+      if (statusEl) {
+        statusEl.textContent = `✓ Completado: Tonalidad ${detectedKey} (confianza ${(confidence * 100).toFixed(0)}%)`;
+        statusEl.style.color = '#4ade80';
+      }
+      LGMDM.ui?.showToast?.(`Pitch Correction completado (${detectedKey})`, 'success', 3500);
 
     } catch (err) {
-      LGMDM.ui.showStatus('pitchCorrectionStatus', `❌ Error: ${err.message}`, 'error');
-      console.error(err);
-      LGMDM.dom.requireById('pitchCorrectionProgress', '14-pitch-correction:progress').style.display = 'none';
+      if (statusEl) {
+        statusEl.textContent = `❌ Error: ${err.message || err}`;
+        statusEl.style.color = '#ff6b81';
+      }
+      console.error('Pitch correction error:', err);
+    } finally {
+      if (applyBtn) applyBtn.disabled = false;
+      if (progEl) progEl.style.display = 'none';
     }
   }
 
-  // Exportar API global
-  const pitchCorrectionUI = {
-    show: showPitchCorrectionPanel,
-    createPanel: createPitchCorrectionPanel,
-  };
-
-  // Auto-init: Agregar panel al body
-  document.addEventListener('DOMContentLoaded', () => {
-    const body = document.body;
-    const div = document.createElement('div');
-    div.innerHTML = createPitchCorrectionPanel();
-    body.appendChild(div.firstElementChild);
-
+  // Wire botón en sidebar
+  function init() {
     const trigger = document.getElementById('btnPitchCorrection');
     if (trigger) {
-      trigger.addEventListener('click', () => showPitchCorrectionPanel());
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        showPitchCorrectionPanel();
+      });
     }
-  });
+  }
 
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 })();

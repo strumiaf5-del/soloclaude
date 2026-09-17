@@ -260,6 +260,60 @@
     }
   }
 
+  // ── Mapping plataformas → codec/bitrate del backend ──
+  Widget.PLATFORM_PARAMS = {
+    'Spotify':   { codec: 'opus', bitrate: 96  },
+    'Apple Music':{ codec: 'aac',  bitrate: 128 },
+    'YouTube':   { codec: 'mp3',  bitrate: 128 }
+  };
+
+  Widget.fetchPlatforms = async function (file, token) {
+    const results = [];
+    for (const [name, p] of Object.entries(Widget.PLATFORM_PARAMS)) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('codec', p.codec);
+      fd.append('bitrate', String(p.bitrate));
+      try {
+        const res = await fetch('/dsp/loudness-penalty', {
+          method: 'POST',
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          body: fd
+        });
+        const data = await res.json();
+        results.push({
+          name,
+          penalty_db: data.penalty_db ?? data.X_Penalty_DB ?? 0,
+          orig_lufs: data.orig_lufs ?? data.X_Orig_LUFS ?? -14,
+          post_lufs: data.post_lufs ?? data.X_Post_LUFS ?? -14
+        });
+      } catch (_) {
+        results.push({ name, penalty_db: 0, orig_lufs: -14, post_lufs: -14 });
+      }
+    }
+    return { platforms: results };
+  };
+
   NS.proFeatures.loudnessPenaltyWidget = Widget;
   if (typeof module !== 'undefined' && module.exports) module.exports = { Widget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // CATALOG key = 'loudness-penalty' (entries vacío — backend
+  // infiere codec/bitrate desde los headers de la request).
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['loudness-penalty']) {
+      const inst = rack.create({
+        id: 'loudness-penalty', title: '🎧 Loudness Penalty', endpoint: '/dsp/loudness-penalty', widget: Widget
+      });
+      if (inst) {
+        Widget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['loudness-penalty'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'loudness-penalty', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

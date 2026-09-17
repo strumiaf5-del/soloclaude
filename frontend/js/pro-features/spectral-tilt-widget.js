@@ -35,22 +35,12 @@
   const DMIN = -12;
   const DMAX = 12;
 
-  function logFreq(f) { return Math.log10(Math.max(1, f)); }
   const LOG_FMIN = logFreq(FMIN);
   const LOG_FMAX = logFreq(FMAX);
 
-  function xFromFreq(f, left, width) {
-    const t = (logFreq(f) - LOG_FMIN) / (LOG_FMAX - LOG_FMIN);
-    return left + t * width;
-  }
-  function yFromDb(db, top, height) {
-    const t = (db - DMIN) / (DMAX - DMIN);
-    return top + (1 - t) * height;
-  }
-  function freqFromX(x, left, width) {
-    const t = (x - left) / width;
-    return Math.pow(10, LOG_FMIN + t * (LOG_FMAX - LOG_FMIN));
-  }
+  function xFromFreq(f, left, width) { return window.xFromFreq(f, left, width, LOG_FMIN, LOG_FMAX); }
+  function yFromDb(db, top, height) { return window.yFromDb(db, top, height, DMIN, DMAX); }
+  function freqFromX(x, left, width) { return window.freqFromX(x, left, width, LOG_FMIN, LOG_FMAX); }
 
   class Widget {
     constructor() {
@@ -328,4 +318,23 @@
 
   NS.proFeatures.spectralTiltWidget = Widget;
   if (typeof module !== 'undefined' && module.exports) module.exports = { Widget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // CATALOG key = 'spectral-tilt'. Widget modela curva HVAC objetivo.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['spectral-tilt']) {
+      const inst = rack.create({
+        id: 'spectral-tilt', title: '📈 Spectral Tilt', endpoint: '/dsp/spectral-tilt', widget: Widget
+      });
+      if (inst) {
+        Widget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['spectral-tilt'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'spectral-tilt', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

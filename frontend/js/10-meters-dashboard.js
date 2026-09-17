@@ -178,7 +178,13 @@ function startDashboardPolling() {
     try {
       const res = await LGMDM.api.apiFetch(`${LGMDM.api.apiBase()}/dashboard`);
       if (!res.ok) return;
-      renderDashboard(await res.json());
+      const m = await res.json();
+      // FIX C1 — Publicar en metrics-store para alimentar subscribers
+      // (GR Multiband de Studio Controller, widgets Pro, etc.)
+      if (m && typeof LGMDM !== 'undefined' && LGMDM.metrics && typeof LGMDM.metrics.publish === 'function') {
+        try { LGMDM.metrics.publish(m, { source: 'dashboard-poll' }); } catch (_) {}
+      }
+      renderDashboard(m);
     } catch (e) {}
   }, 5000);
 }

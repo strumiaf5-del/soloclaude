@@ -269,7 +269,25 @@
     return el;
   }
   function invalidateCachedEl(...ids) { ids.forEach(id => domCache.delete(id)); }
+  function byId(id) {
+    const node = document.getElementById(id);
+    if (!node && typeof console !== 'undefined') {
+      console.debug(`[LGMDM.dom] #${id} not found`);
+    }
+    return node;
+  }
+  function requireById(id, owner = '') {
+    const node = document.getElementById(id);
+    if (!node) {
+      const err = new Error(`[LGMDM DOM CONTRACT] ${owner || 'unknown'}: #${id} is required but missing`);
+      console.error(err);
+      throw err;
+    }
+    return node;
+  }
   LGMDM.dom = LGMDM.dom || {};
   LGMDM.dom.cachedEl = cachedEl;
   LGMDM.dom.invalidateCachedEl = invalidateCachedEl;
+  LGMDM.dom.byId = byId;
+  LGMDM.dom.requireById = requireById;
 })(window);

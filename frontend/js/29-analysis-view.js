@@ -76,9 +76,10 @@
   let requestSeq = 0;
   let requestedFile = null;
   let lastData = null;
+  const getSelectedFile = () => LG.state?.selectedFile ?? null;
 
   async function requestAnalysis(options = {}) {
-    const file = window.selectedFile;
+    const file = getSelectedFile();
     if (!(file instanceof File)) {
       throw new Error('No existe archivo seleccionado para el análisis server-side');
     }
@@ -91,37 +92,20 @@
     const res = await LG.api.apiFetch(`${LG.api.apiBase()}/analysis`, {
       method: 'POST', body, timeout: 60000, maxRetries: 1,
     });
-    if (seq !== requestSeq || requestedFile !== window.selectedFile) return null;
+    if (seq !== requestSeq || requestedFile !== getSelectedFile()) return null;
     if (!res.ok) {
       let detail = `HTTP ${res.status}`;
       try { const text = await res.text(); if (text) detail += `: ${text}`; } catch (_) {}
       throw new Error(`Análisis server-side rechazado: ${detail}`);
     }
     const data = await res.json();
-    if (seq !== requestSeq || requestedFile !== window.selectedFile) return null;
+    if (seq !== requestSeq || requestedFile !== getSelectedFile()) return null;
     lastData = data;
     renderServerAnalysis(data);
     setStatus('ready', 'Análisis completo del servidor disponible');
     window.dispatchEvent(new CustomEvent('lgmdm:analysis-state', { detail: { state: 'ready', text: 'Análisis completo del servidor disponible', progress: 100 } }));
     window.dispatchEvent(new CustomEvent('analysis-updated', { detail: data }));
     return data;
-  }
-
-  function handleAnalysisWorkspaceOpen() {
-    if (!(window.selectedFile instanceof File)) {
-      clear();
-      return;
-    }
-    if (lastData && requestedFile === window.selectedFile) {
-      renderServerAnalysis(lastData);
-      setStatus('ready', 'Análisis completo del servidor disponible');
-      return;
-    }
-    requestAnalysis().catch((error) => {
-      console.error('[analysis] server-side analysis failed', error);
-      setStatus('error', error.message);
-      window.dispatchEvent(new CustomEvent('lgmdm:analysis-state', { detail: { state: 'error', text: error.message } }));
-    });
   }
   window.addEventListener('lgmdm:file-selected', () => { requestSeq += 1; lastData = null; requestedFile = null; clear(); });
 })();

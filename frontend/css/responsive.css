@@ -2,41 +2,12 @@
    RESPONSIVE DESIGN - Mobile First Approach
    ═══════════════════════════════════════════════════════════════════════════ */
 
-:root {
-  --mobile-padding: 8px;
-  --mobile-gap: 6px;
-  --mobile-font-size: 13px;
-}
-
 /* ─────────────────────────────────────────────────────────────────────────
    TABLET: 600px - 959px
    ───────────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 959px) {
-  :root {
-    --spacing-lg: 12px;
-    --spacing-md: 8px;
-  }
-
-  body {
-    font-size: 14px;
-  }
-
   /* Layout principal owned by layout-shell.css. */
-
-  .sidebar-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .sidebar-tab {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding: 8px 12px;
-  }
 
   /* Grid */
   .control-grid {
@@ -78,11 +49,6 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 599px) {
-  :root {
-    --spacing-lg: 8px;
-    --spacing-md: 4px;
-  }
-
   html, body {
     font-size: 13px;
     overflow-x: hidden;
@@ -125,32 +91,6 @@
 
   /* Shell geometry is owned by layout-shell.css. */
 
-  .sidebar-tabs {
-    display: flex;
-    gap: 2px;
-    padding: 4px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
-  }
-
-  .sidebar-tab {
-    flex: 0 0 auto;
-    padding: 6px 10px;
-    font-size: 11px;
-    white-space: nowrap;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary, rgba(255,255,255,0.6));
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .sidebar-tab.active {
-    color: var(--accent);
-    border-bottom: 2px solid var(--accent);
-  }
-
   .sidebar-pane {
     display: none;
     max-height: 400px;
@@ -177,7 +117,7 @@
   .content-section {
     padding: 8px;
     margin: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--ui-border);
   }
 
   .content-section h2 {
@@ -359,7 +299,7 @@
   .mixer-stem {
     padding: 6px;
     border-radius: 4px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--ui-border);
   }
 
   .mixer-fader {
@@ -374,7 +314,7 @@
   .mixer-eq-section {
     margin-top: 6px;
     padding-top: 6px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--ui-border);
   }
 
   /* TABLES */
@@ -406,7 +346,7 @@
 
   .project-item {
     padding: 6px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--ui-border);
     font-size: 12px;
   }
 
@@ -427,7 +367,7 @@
   .player-bar {
     flex: 1;
     height: 3px;
-    background: var(--border);
+    background: var(--ui-border);
     border-radius: 2px;
   }
 
@@ -484,7 +424,7 @@
 
   /* FOCUS para touch */
   *:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--ui-accent);
     outline-offset: 1px;
   }
 

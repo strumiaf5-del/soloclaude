@@ -12,6 +12,7 @@
     stereo: 'STEREO / COLOR',
     output: 'OUTPUT',
   };
+  const R2_KEY = 'v1:lgmdm-chain-r2';
   const FAMILY_HINTS = {
     input: ['ruido', 'input gain'],
     eq: ['ecualización', 'filtros de borde', 'eq correctiva', 'dynamic eq', 'balance tonal', 'eq tonal', 'modo eq', 'mid / side'],
@@ -50,7 +51,7 @@
       btn.setAttribute('aria-selected', String(i === 0));
       nav.appendChild(btn);
     });
-    chain.querySelector('.process-card-header')?.insertAdjacentElement('afterend', nav);
+    chain.parentNode?.insertBefore(nav, chain);
 
     const children = Array.from(body.children);
     let currentFamily = 'input';
@@ -72,10 +73,6 @@
     }
 
     const CHAIN_FAMILY_KEY = 'v2:lgmdm-chain-family';
-    if (!('__lgmdmChainFamilyWarned' in global)) {
-      global.__lgmdmChainFamilyWarned = true;
-      console.warn('[chain-family-tabs] storage key versionada a v2:lgmdm-chain-family (antes lgmdm-chain-family)');
-    }
     const showFamily = (family) => {
       for (const [f, nodes] of grouped) {
         nodes.forEach(node => {
@@ -103,6 +100,21 @@
       if (FAMILY_ORDER.includes(saved)) initial = saved;
     } catch (_) {}
     showFamily(initial);
+
+    // ── R2 toggle (2 columnas) ──
+    let r2Active = false;
+    try { r2Active = LGMDM.storage.get(R2_KEY) === '1'; } catch (_) {}
+    if (r2Active) chain.classList.add('chain-r2');
+
+    const r2Toggle = document.createElement('label');
+    r2Toggle.className = 'chain-r2-toggle';
+    r2Toggle.innerHTML = `<input type="checkbox" ${r2Active ? 'checked' : ''}/> Vista 2 columnas (R2)`;
+    r2Toggle.querySelector('input').addEventListener('change', (e) => {
+      r2Active = e.target.checked;
+      chain.classList.toggle('chain-r2', r2Active);
+      try { LGMDM.storage.set(R2_KEY, r2Active ? '1' : '0'); } catch (_) {}
+    });
+    nav.parentNode?.insertBefore(r2Toggle, nav.nextSibling);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build, { once: true });

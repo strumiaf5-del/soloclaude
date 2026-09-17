@@ -37,17 +37,10 @@
   const DMIN = -60;
   const DMAX = 0;
 
-  function logFreq(f) { return Math.log10(Math.max(1, f)); }
   const LOG_FMIN = logFreq(FMIN);
   const LOG_FMAX = logFreq(FMAX);
-  function xFromFreq(f, left, width) {
-    const t = (logFreq(f) - LOG_FMIN) / (LOG_FMAX - LOG_FMIN);
-    return left + t * width;
-  }
-  function yFromDb(db, top, height) {
-    const t = (db - DMIN) / (DMAX - DMIN);
-    return top + (1 - t) * height;
-  }
+  function xFromFreq(f, left, width) { return window.xFromFreq(f, left, width, LOG_FMIN, LOG_FMAX); }
+  function yFromDb(db, top, height) { return window.yFromDb(db, top, height, DMIN, DMAX); }
 
   class Widget {
     constructor() {
@@ -386,6 +379,44 @@
     }
   }
 
+  // ── Mapping I/II/III (UI Softube-style) → sigmoid/tanh/chebyshev (backend) ──
+  Widget.CURVE_MAP = {
+    'I': 'sigmoid',
+    'II': 'tanh',
+    'III': 'chebyshev'
+  };
+  Widget.toBackendCurve = function (typeUI) {
+    return Widget.CURVE_MAP[typeUI] || 'sigmoid';
+  };
+  Widget.toBackendParams = function (data) {
+    return {
+      drive: (data.drive || 0) / 100,
+      mix: data.mix != null ? data.mix : 1.0,
+      curve: Widget.toBackendCurve(data.type)
+    };
+  };
+
   NS.proFeatures.saturationWidget = Widget;
   if (typeof module !== 'undefined' && module.exports) module.exports = { Widget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Mapea al CATALOG key 'inflator' (la UI usa I/II/III; el backend recibe
+  // sigmoid/chebyshev/tanh — el mapping está en CATALOG['inflator']).
+  // Backward-compat: si NS.create falla, la clase sigue funcionando standalone.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['inflator']) {
+      const inst = rack.create({
+        id: 'inflator', title: '🔥 Saturation', endpoint: '/dsp/inflator', widget: Widget
+      });
+      if (inst) {
+        Widget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['inflator'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'saturation', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

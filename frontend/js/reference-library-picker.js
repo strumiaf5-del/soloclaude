@@ -93,7 +93,7 @@
     LGMDM.state.reference.file = null;       // anular el File subido a mano
 
     // Mostrar nombre seleccionado en el label del input de referencia
-    const label = document.getElementById("refFileLabel") || document.getElementById("ref-file-label");
+    const label = document.getElementById("refFileLabel") || document.getElementById("ref-file-label") || document.getElementById("refFileName");
     if (label) label.textContent = "📌 " + entry.filename;
 
     // Invalidar caché de sesión del WS de ref-preview
@@ -170,16 +170,22 @@
 
   // ── Botón que abre el modal (se inserta junto al input de referencia) ──────
   function _injectButton() {
-    // Buscar el label/botón del archivo de referencia
+    const bindOnce = LGMDM.ui?.bindOnce || ((el, type, fn, key, opts) => { el?.addEventListener(type, fn, opts); return true; });
+    let btn = document.getElementById("btnOpenRefLib");
+    if (btn) {
+      bindOnce(btn, "click", (e) => { e.preventDefault(); _openModal(); }, "ref-lib-open");
+      return;
+    }
+
+    // Buscar el label/botón del archivo de referencia si no existe el botón estático
     const refInput = document.getElementById("refFileInput") || document.querySelector("input[id*='ref'][type='file']");
     if (!refInput) return;
 
-    const btn = document.createElement("button");
+    btn = document.createElement("button");
     btn.className = "btn btn-secondary btn-sm";
     btn.id = "btnOpenRefLib";
     btn.classList.add("ref-lib-open-button");
     btn.textContent = "📚 Elegir desde biblioteca de referencias";
-    const bindOnce = LGMDM.ui?.bindOnce || ((el, type, fn, key, opts) => { el?.addEventListener(type, fn, opts); return true; });
     bindOnce(btn, "click", (e) => { e.preventDefault(); _openModal(); }, "ref-lib-open");
 
     // Insertar después del input de referencia (o su wrapper)

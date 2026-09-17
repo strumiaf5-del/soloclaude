@@ -195,7 +195,7 @@
         const file = e.target.files[0];
         const statusEl = LGMDM.dom.requireById("presetLoadStatus", "03-presets.js");
         if (!file) return;
-        statusEl.style.color = "var(--muted)";
+        statusEl.style.color = "var(--ui-muted)";
         statusEl.textContent = "Leyendo " + file.name + "…";
         try {
           const text = await file.text();
@@ -205,11 +205,11 @@
           applyPresetToUI(presetData);
           document.querySelectorAll(".preset-btn.active").forEach((b) => b.classList.remove("active"));
           activePreset = data.name || file.name.replace(/\.json$/i, "");
-          statusEl.style.color = "var(--yellow)";
+          statusEl.style.color = "var(--ui-warn)";
           statusEl.textContent = `✓ Preset "${activePreset}" cargado desde JSON`;
         } catch (err) {
           console.error("Error cargando preset JSON:", err);
-          statusEl.style.color = "var(--red)";
+          statusEl.style.color = "var(--ui-danger)";
           statusEl.textContent = "Error: JSON inválido o parámetros no reconocidos";
         } finally {
           e.target.value = "";

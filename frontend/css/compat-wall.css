@@ -9,10 +9,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2147483647;
-  background: linear-gradient(135deg, #0a0e27 0%, #1a1d3a 100%);
-  color: #f7f8ff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  z-index: var(--z-compat, 2147483647);
+  background: linear-gradient(135deg, var(--ui-bg, #0a0e27) 0%, #1a1d3a 100%);
+  color: var(--ui-text, #f7f8ff);
+  font-family: var(--ui-font-display, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif);
   overflow: auto;
   padding: 2rem;
   animation: compat-wall-fade-in 0.4s ease-out;
@@ -27,9 +27,9 @@
   max-width: 480px;
   width: 100%;
   padding: 2.5rem;
-  background: rgba(15, 18, 35, 0.85);
+  background: var(--ui-surface, rgba(15, 18, 35, 0.95));
   border-radius: 12px;
-  border: 1px solid rgba(35, 231, 255, 0.3);
+  border: 1px solid var(--ui-border-strong, rgba(35, 231, 255, 0.3));
   box-shadow: 0 0 40px rgba(35, 231, 255, 0.15),
               0 10px 30px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
@@ -38,7 +38,7 @@
 .compat-wall__content h1 {
   font-size: 1.75rem;
   margin: 0 0 1rem;
-  color: #ff6b6b;
+  color: var(--ui-danger, #ff6b6b);
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -60,8 +60,8 @@
   justify-content: space-between;
   padding: 0.65rem 1rem;
   margin: 0.4rem 0;
-  background: rgba(35, 231, 255, 0.08);
-  border-left: 3px solid #23e7ff;
+  background: var(--ui-accent-ghost, rgba(35, 231, 255, 0.08));
+  border-left: 3px solid var(--ui-accent, #23e7ff);
   border-radius: 4px;
 }
 
@@ -70,19 +70,19 @@
 }
 
 .compat-wall__content a {
-  color: #23e7ff;
+  color: var(--ui-accent, #23e7ff);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.875rem;
   padding: 0.25rem 0.75rem;
-  border: 1px solid #23e7ff;
+  border: 1px solid var(--ui-accent, #23e7ff);
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .compat-wall__content a:hover {
-  background: #23e7ff;
-  color: #0a0e27;
+  background: var(--ui-accent, #23e7ff);
+  color: var(--ui-bg, #0a0e27);
 }
 
 .compat-wall__small {

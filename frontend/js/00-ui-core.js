@@ -143,7 +143,32 @@
     document.querySelectorAll('[data-parallel-bypass]').forEach(syncParallelBypass);
   }
 
-  LG.ui = Object.assign(LG.ui || {}, { bindOnce, initDeclarativeControls, escapeHtml, safeAudioSrc, getContent, clearResults, showStatus });
+  // ── Toast notifications (migrado desde 16-error-handling.js) ─────────
+  function createToastContainer() {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.setAttribute('role', 'region');
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-label', 'Notificaciones');
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    return container;
+  }
+
+  function showToast(message, type = 'info', duration = 4000) {
+    const container = createToastContainer();
+    const toast = document.createElement('lgmdm-toast');
+    toast.setAttribute('type', type);
+    toast.setAttribute('message', String(message));
+    container.appendChild(toast);
+    toast.scheduleRemove?.(duration);
+    return toast;
+  }
+
+  LG.ui = Object.assign(LG.ui || {}, { bindOnce, initDeclarativeControls, escapeHtml, safeAudioSrc, getContent, clearResults, showStatus, showToast });
   if (document.readyState === 'loading') bindOnce(document, 'DOMContentLoaded', initDeclarativeControls, 'ui-declarative-dom-ready', { once: true });
   else initDeclarativeControls();
 })(window);

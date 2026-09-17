@@ -25,13 +25,7 @@
     { id: 'wet',         label: 'Wet (mix)',    min: 0,   max: 1,    step: 0.01, unit: '',  fmt: (v) => `${(v * 100).toFixed(0)}%` }
   ];
 
-  function clamp(n, lo, hi) {
-    n = Number(n);
-    if (!Number.isFinite(n)) return lo;
-    return Math.max(lo, Math.min(hi, n));
-  }
-
-  class ReverbWidget {
+  class reverbWidget {
     constructor() {
       this.canvas = null;
       this.root = null;
@@ -67,7 +61,7 @@
           <strong class="pro-card-title" style="font-size:.78rem;">
             🌫 Automatic Reverb Designer
           </strong>
-          <span style="font-size:.62rem;color:var(--muted,#9ba6c4);">
+          <span style="font-size:.62rem;color:var(--ui-muted,#9ba6c4);">
             Room Size · Pre-delay · Decay · Wet Mix
           </span>
         </div>
@@ -85,13 +79,13 @@
 
         <div class="pro-control-row"
              style="display:grid;grid-template-columns:140px 1fr;align-items:center;gap:.8rem;">
-          <label style="font-size:.72rem;color:var(--muted,#9ba6c4);">Reverb Type</label>
+          <label style="font-size:.72rem;color:var(--ui-muted,#9ba6c4);">Reverb Type</label>
           <div id="rvTypes" style="display:flex;gap:.35rem;flex-wrap:wrap;">
             ${REVERB_TYPES.map((t) => `
               <button type="button" class="rv-type-btn" data-type="${t.id}"
                       style="flex:1;min-width:80px;padding:.45rem .55rem;border-radius:9px;
                              border:1px solid rgba(255,255,255,.08);
-                             background:rgba(255,255,255,.03);color:var(--muted,#9ba6c4);
+                             background:rgba(255,255,255,.03);color:var(--ui-muted,#9ba6c4);
                              cursor:pointer;font-size:.72rem;transition:.2s;">
                 <div style="font-weight:750;">${t.label}</div>
                 <div style="font-size:.58rem;opacity:.75;margin-top:.1rem;">${t.note}</div>
@@ -104,7 +98,7 @@
           <button id="rvGenerateIR" class="pro-secondary"
                   style="border-radius:10px;padding:.6rem 1.1rem;cursor:pointer;
                          border:1px solid rgba(255,255,255,.12);
-                         background:rgba(255,255,255,.04);color:var(--text,#eef3ff);
+                         background:rgba(255,255,255,.04);color:var(--ui-text,#eef3ff);
                          font-weight:750;">
             🌫 Generate IR
           </button>
@@ -121,7 +115,7 @@
              style="padding:.6rem;border-radius:12px;background:rgba(255,255,255,.025);
                     border:1px solid rgba(255,255,255,.06);">
           <span style="font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;
-                       color:var(--muted,#9ba6c4);">
+                       color:var(--ui-muted,#9ba6c4);">
             Spectrogram preview (audio con reverb)
           </span>
           <canvas id="rvSpectrogram" width="400" height="100"
@@ -203,7 +197,7 @@
               <button type="button" data-type="${t.id}"
                       style="flex:1;min-width:80px;padding:.45rem .55rem;border-radius:9px;
                              border:1px solid rgba(255,255,255,.08);
-                             background:rgba(255,255,255,.03);color:var(--muted,#9ba6c4);
+                             background:rgba(255,255,255,.03);color:var(--ui-muted,#9ba6c4);
                              cursor:pointer;font-size:.72rem;">
                 <div style="font-weight:750;">${t.label}</div>
               </button>
@@ -213,7 +207,7 @@
             <button data-role="generate-ir"
                     style="border-radius:10px;padding:.6rem 1.1rem;cursor:pointer;
                            border:1px solid rgba(255,255,255,.12);
-                           background:rgba(255,255,255,.04);color:var(--text,#eef3ff);
+                           background:rgba(255,255,255,.04);color:var(--ui-text,#eef3ff);
                            font-weight:750;">
               🌫 Generate IR
             </button>
@@ -321,7 +315,7 @@
         btn.style.borderColor = active
           ? 'rgba(82,242,189,.55)'
           : 'rgba(255,255,255,.08)';
-        btn.style.color = active ? '#dcfbff' : 'var(--muted,#9ba6c4)';
+        btn.style.color = active ? '#dcfbff' : 'var(--ui-muted,#9ba6c4)';
       });
     }
 
@@ -569,6 +563,27 @@
     }
   }
 
-  LG.proFeatures.ReverbWidget = ReverbWidget;
-  global.ReverbWidget = ReverbWidget;
+  LG.proFeatures.reverbWidget = reverbWidget;
+  if (typeof module !== 'undefined' && module.exports) module.exports = { reverbWidget };
+
+  // ── MX-01 — Migrate to Insert abstraction ────────────────────────────
+  // Frontend-only: knobs (room_size/pre_delay/decay/wet) + type (Hall/Plate/...),
+  // dispatch via CustomEvent('reverb-apply'). Sin /dsp/* endpoint propio.
+  try {
+    const rack = window.LGMDM && window.LGMDM.proInsertRack;
+    if (rack && typeof rack.create === 'function'
+        && rack.CATALOG && rack.CATALOG['reverb']) {
+      const inst = rack.create({
+        id: 'reverb', title: '🌫 Reverb Designer', widget: reverbWidget
+      });
+      if (inst) {
+        reverbWidget.Insert = inst;
+        rack.registry = rack.registry || {};
+        rack.registry['reverb'] = inst;
+      }
+    }
+  } catch (e) {
+    if (typeof console !== 'undefined') console.debug('[insert-migration]', 'reverb', e);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);
+
